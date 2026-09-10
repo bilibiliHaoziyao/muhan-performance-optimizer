@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SoC 型号"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvSocModelValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@color/divider" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SoC 温度"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvSocTempValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@color/divider" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CPU 核心数"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvCpuCoreValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@color/divider" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CPU 指令集架构"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvCpuAbiValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@color/divider" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CPU 利用率 / 频率"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvCpuValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground" />
+
+        <TextView
+            android:id="@+id/tvCpuClickHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cpu_click_hint"
+            android:textColor="?attr/colorOutline"
+            android:textSize="12sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@color/divider" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GPU 利用率 / 频率"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvGpuValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="数据每 0.5 秒刷新一次；GPU 数据部分机型需 Root 权限方可读取。"
+            android:textColor="?attr/colorOutline"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,75 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.muhan.socbatteryinfo'
+    compileSdk 35
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    defaultConfig {
+        applicationId "com.muhan.socbatteryinfo"
+        minSdk 24
+        targetSdk 35
+        versionCode 73
+        versionName "73"
+
+        // 声明支持的 CPU 架构（本应用无 so 库，默认即全架构通用，此处显式声明）
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('../release.keystore')
+            storePassword 'android'
+            keyAlias 'muhan'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            // 使用发布签名，避免生成测试签名 APK
+            signingConfig signingConfigs.release
+        }
+    }
+
+    // 沙箱环境的 lint 的 Kotlin 分析 (UAST) 会崩溃，跳过 release 构建的 lint 检查
+    lint {
+        checkReleaseBuilds = false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+        // Shizuku API 需要 core library desugaring（minSdk 21 < 26）
+        coreLibraryDesugaringEnabled true
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.15.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.viewpager2:viewpager2:1.1.0'
+
+    // Shizuku：通过 ADB Shell 权限执行命令
+    implementation 'dev.rikka.shizuku:api:13.1.5'
+    implementation 'dev.rikka.shizuku:provider:13.1.5'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+}

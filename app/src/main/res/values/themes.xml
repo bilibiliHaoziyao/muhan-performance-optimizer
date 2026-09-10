@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material Design 3 Theme -->
+    <style name="Theme.SocBatteryInfo" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary Colors -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorPrimaryContainer">@color/primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/on_primary_container</item>
+
+        <!-- Secondary Colors -->
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorOnSecondary">@color/on_secondary</item>
+        <item name="colorSecondaryContainer">@color/secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/on_secondary_container</item>
+
+        <!-- Tertiary Colors -->
+        <item name="colorTertiary">@color/tertiary</item>
+        <item name="colorOnTertiary">@color/on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/on_tertiary_container</item>
+
+        <!-- Error Colors -->
+        <item name="colorError">@color/error</item>
+        <item name="colorOnError">@color/on_error</item>
+        <item name="colorErrorContainer">@color/error_container</item>
+        <item name="colorOnErrorContainer">@color/on_error_container</item>
+
+        <!-- Background & Surface -->
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorOnBackground">@color/on_background</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant</item>
+
+        <!-- Outlines & Dividers -->
+        <item name="colorOutline">@color/outline</item>
+        <item name="colorOutlineVariant">@color/outline_variant</item>
+
+        <!-- Status Bar -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+
+        <!-- Text Colors -->
+        <item name="android:textColorPrimary">?attr/colorOnSurface</item>
+        <item name="android:textColorSecondary">?attr/colorOnSurfaceVariant</item>
+        <item name="android:textColorHint">?attr/colorOutline</item>
+    </style>
+
+    <!-- Toolbar -->
+    <style name="ToolbarTheme" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
+        <item name="android:textColorPrimary">?attr/colorOnPrimary</item>
+        <item name="colorControlNormal">?attr/colorOnPrimary</item>
+    </style>
+
+    <!-- TabLayout Material3 style -->
+    <style name="Widget.SocBatteryInfo.Material3.TabLayout" parent="Widget.MaterialComponents.TabLayout">
+        <item name="tabBackground">@drawable/bg_tab_selector</item>
+        <item name="tabTextColor">@color/text_secondary</item>
+        <item name="tabSelectedTextColor">@color/tab_active</item>
+        <item name="tabIndicatorColor">@color/tab_active</item>
+        <item name="tabIndicatorHeight">3dp</item>
+        <item name="tabIndicatorFullWidth">false</item>
+    </style>
+</resources>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material Design 3 Color Scheme (Light) -->
+    <color name="primary">#6750A4</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="primary_container">#EADDFF</color>
+    <color name="on_primary_container">#21005D</color>
+
+    <color name="secondary">#625B71</color>
+    <color name="on_secondary">#FFFFFF</color>
+    <color name="secondary_container">#E8DEF8</color>
+    <color name="on_secondary_container">#1D192B</color>
+
+    <color name="tertiary">#7D5260</color>
+    <color name="on_tertiary">#FFFFFF</color>
+    <color name="tertiary_container">#FFD8E4</color>
+    <color name="on_tertiary_container">#31111D</color>
+
+    <color name="error">#B3261E</color>
+    <color name="on_error">#FFFFFF</color>
+    <color name="error_container">#F9DEDC</color>
+    <color name="on_error_container">#410E0B</color>
+
+    <color name="background">#FFFEF7</color>
+    <color name="on_background">#1C1B1F</color>
+    <color name="surface">#FFFEF7</color>
+    <color name="on_surface">#1C1B1F</color>
+    <color name="surface_variant">#E7E0EC</color>
+    <color name="on_surface_variant">#49454F</color>
+
+    <color name="divider">#1F000000</color>
+    <color name="divider_light">#33000000</color>
+
+    <color name="text_secondary">#49454F</color>
+    <color name="text_hint">#79747E</color>
+
+    <!-- Tab colors -->
+    <color name="tab_active">#6750A4</color>
+
+    <!-- State layers & Scrims -->
+    <color name="scrim">#000000</color>
+    <color name="inverse_surface">#313033</color>
+    <color name="inverse_on_surface">#F4EFF4</color>
+    <color name="inverse_primary">#D0BCFF</color>
+    <color name="outline">#79747E</color>
+    <color name="outline_variant">#CAC4D0</color>
+</resources>

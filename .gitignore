@@ -1,0 +1,25 @@
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Local configuration
+local.properties
+*.keystore
+*.jks
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+
+# Build artifacts
+*.apk
+*.aab
+*.ap_
+captures/
+.externalNativeBuild
+.cxx/

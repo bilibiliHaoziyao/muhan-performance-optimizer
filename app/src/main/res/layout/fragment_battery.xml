@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="电池容量（设计）"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvCapacityValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvLevelValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="14sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@color/divider" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="充电功率"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvPowerValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="双电芯"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="双电芯串联电压更高，开启后按 ×2 计算"
+                    android:textColor="?attr/colorOutline"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchDualCell"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@color/divider" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="电池温度"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvBatteryTempValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="数据每 0.5 秒刷新一次；充电显示功率（正），未充电显示功耗（负），精确到小数点后 1 位。"
+            android:textColor="?attr/colorOutline"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+</ScrollView>

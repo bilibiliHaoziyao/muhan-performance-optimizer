@@ -1,0 +1,203 @@
+<resources>
+    <string name="app_name">慕寒性能优化</string>
+    <string name="tab_optimize">优化</string>
+    <string name="tab_soc">SoC</string>
+    <string name="tab_system">系统</string>
+    <string name="tab_battery">电池</string>
+    <string name="tab_screen">屏幕</string>
+    <string name="tab_storage">存储</string>
+    <string name="unsupported">设备不支持此功能</string>
+    <string name="needs_root">需要Root</string>
+
+    <!-- 优化 Tab -->
+    <string name="optimize_ram_title">运存占用</string>
+    <string name="optimize_ram_usage">--</string>
+    <string name="optimize_ram_detail">已用 -- / 总计 --</string>
+    <string name="optimize_ram_available">可用 %1$s</string>
+    <string name="optimize_auto_clean">自动清理运存</string>
+    <string name="optimize_auto_clean_desc">运存占用率超过阈值时，自动清理后台进程（每 3 分钟检查一次）</string>
+    <string name="optimize_threshold">触发阈值</string>
+    <string name="optimize_threshold_value">%1$d%%</string>
+    <string name="optimize_interval">检查间隔</string>
+    <string name="optimize_interval_value">每 3 分钟</string>
+    <string name="optimize_whitelist">清理白名单</string>
+    <string name="optimize_whitelist_desc">白名单内的应用不会被自动清理（默认已包含 QQ、微信）</string>
+    <string name="optimize_whitelist_empty">暂无白名单应用</string>
+    <string name="optimize_whitelist_add_hint">输入应用包名</string>
+    <string name="optimize_clean_now">立即清理运存</string>
+    <string name="optimize_clean_result">已清理 %1$d 个后台进程</string>
+    <string name="optimize_clean_none">没有可清理的后台进程</string>
+    <string name="optimize_clean_stat">今日已清理 %1$d 次</string>
+    <string name="optimize_service_running">后台监控运行中</string>
+    <string name="optimize_service_stopped">后台监控未运行</string>
+    <string name="optimize_battery_permission">忽略电池优化</string>
+    <string name="optimize_battery_permission_desc">允许应用在后台持续运行，避免被系统休眠</string>
+    <string name="optimize_battery_permission_granted">已忽略</string>
+    <string name="optimize_chart_title">运存占用趋势</string>
+    <string name="optimize_whitelist_add">添加</string>
+    <string name="optimize_whitelist_remove">移除</string>
+    <string name="optimize_whitelist_dialog_title">添加白名单应用</string>
+    <string name="optimize_whitelist_invalid">请输入有效的应用包名</string>
+    <string name="optimize_channel_name">运存优化</string>
+    <string name="optimize_channel_desc">自动清理后台进程并显示运存占用</string>
+    <string name="optimize_notify_title">运存优化</string>
+    <string name="optimize_notify_usage">运存占用 %1$d%%%2$s</string>
+    <string name="optimize_notify_cleaned_suffix"> · 已清理 %1$d 个进程</string>
+    <string name="optimize_permission_kill">清理后台进程权限</string>
+    <string name="optimize_permission_kill_desc">系统已授予（KILL_BACKGROUND_PROCESSES）</string>
+
+    <string name="sys_android_version">Android 版本</string>
+    <string name="sys_android_value">Android %1$s</string>
+    <string name="sys_api_level">API 版本</string>
+    <string name="sys_os_name">操作系统</string>
+    <string name="sys_system_version">系统版本</string>
+    <string name="sys_build_time">系统构建时间</string>
+    <string name="sys_uptime">已开机时长</string>
+    <string name="sys_security_patch">安全补丁级别</string>
+    <string name="sys_kernel">内核版本</string>
+    <string name="sys_device_model">设备型号</string>
+    <string name="sys_manufacturer">制造商</string>
+    <string name="sys_abi">处理器架构</string>
+    <string name="sys_bootloader">Bootloader 状态</string>
+    <string name="sys_bootloader_unlocked">已解锁</string>
+    <string name="sys_bootloader_locked">已锁定</string>
+    <string name="sys_footer_hint">开机时长每 30 秒刷新一次；Bootloader 状态读取失败时表示设备不支持。</string>
+
+    <string name="theme_label">主题模式</string>
+    <string name="theme_follow_system">跟随系统</string>
+    <string name="theme_light">浅色模式</string>
+    <string name="theme_dark">深色模式</string>
+    <string name="monet_color_label">莫奈取色</string>
+    <string name="monet_color_desc">跟随系统壁纸动态调整应用配色，仅 Android 12+ 支持</string>
+
+    <string name="display_mode_label">显示方式</string>
+    <string name="display_mode_hint">多选一：悬浮窗 / 实时通知 / 小米超级岛 / vivo 原子通知</string>
+    <string name="display_mode_off">关闭</string>
+    <string name="display_mode_floating">悬浮窗</string>
+    <string name="display_mode_live_update">实时通知</string>
+    <string name="display_mode_island">小米超级岛（实验性）</string>
+    <string name="display_mode_vivo">vivo 原子岛 / 原子通知（实验性）</string>
+    <string name="display_mode_floating_desc">在屏幕显示可拖动的半透明悬浮窗</string>
+    <string name="display_mode_live_update_desc">在通知栏以实时更新形式显示电池状态，Android 16+ 自动提升为实时动态</string>
+    <string name="display_mode_island_desc">在支持超级岛的小米设备上以“岛”形式显示，不支持的设备降级为普通通知</string>
+    <string name="display_mode_vivo_desc">在支持的 vivo 设备上以原子岛 / 原子通知显示，不支持的设备降级为普通通知</string>
+
+    <string name="live_update_channel_name">实时通知</string>
+    <string name="live_update_channel_desc">常驻实时通知，显示充电功率与电池状态</string>
+    <string name="island_channel_name">超级岛通知</string>
+    <string name="island_channel_desc">以小米超级岛形式显示电池状态</string>
+    <string name="vivo_atomic_channel_name">原子通知</string>
+    <string name="vivo_atomic_channel_desc">以 vivo 原子岛 / 原子通知显示电池与设备状态</string>
+    <string name="live_update_charging">充电中</string>
+    <string name="stop_monitor">停止监测</string>
+
+    <string name="notify_permission_denied">通知权限被拒绝，无法显示通知</string>
+    <string name="overlay_permission_denied">未授予悬浮窗权限，无法显示悬浮窗</string>
+
+    <string name="settings_title">设置</string>
+    <string name="root_status">Root 状态</string>
+    <string name="root_granted">已获取 Root 权限</string>
+    <string name="root_missing">未获取 Root 权限</string>
+    <string name="root_missing_toast">Root权限缺失，部分功能无法使用</string>
+    <string name="missing_both_toast">Root与Shizuku缺失，部分功能无法使用</string>
+    <string name="missing_root_toast">Root缺失，部分功能无法使用</string>
+    <string name="missing_shizuku_toast">Shizuku缺失，部分功能无法使用</string>
+
+    <string name="shizuku_status">Shizuku 状态</string>
+    <string name="shizuku_granted">已连接并授权</string>
+    <string name="shizuku_no_permission">Shizuku 已运行，但未授权</string>
+    <string name="shizuku_not_running">Shizuku 未运行（请安装并启动 Shizuku）</string>
+    <string name="shizuku_request">申请 Shizuku 授权</string>
+
+    <string name="cpu_core_title">CPU 核心详情</string>
+    <string name="cpu_core_label">核心 %1$d</string>
+    <string name="cpu_click_hint">点击查看分核心详情</string>
+    <string name="core_select_title">选择显示的核心</string>
+    <string name="core_select_all">全部</string>
+    <string name="core_select_none">无</string>
+
+    <string name="floating_switch_label">悬浮窗</string>
+    <string name="floating_content_label">显示内容（悬浮窗 / 超级岛 / vivo 原子通知）</string>
+    <string name="float_item_cpu">CPU 利用率 / 频率</string>
+    <string name="float_item_core">分核心 CPU 占用（长按选择核心）</string>
+    <string name="float_item_gpu">GPU 利用率 / 频率</string>
+    <string name="float_item_soc_temp">SoC 温度</string>
+    <string name="float_item_battery_temp">电池温度</string>
+    <string name="float_item_power">电池功率 / 功耗</string>
+    <string name="float_item_level">电池电量</string>
+    <string name="float_item_refresh">屏幕刷新率</string>
+
+    <string name="about_developer">本软件由慕寒_Official开发</string>
+    <string name="about_version">版本 73</string>
+    <string name="about_bilibili">我的哔哩哔哩</string>
+    <string name="about_bilibili_url">https://b23.tv/SGGpYuN</string>
+    <string name="about_bilibili_open_failed">无法打开浏览器</string>
+
+    <string name="welcome_title">欢迎使用慕寒性能优化</string>
+    <string name="welcome_tagline">为非专业用户打造的简易性能面板</string>
+    <string name="welcome_privacy_title">您的隐私，我们的责任</string>
+    <string name="welcome_privacy_message">本软件不联网，不收集隐私，不放恶意代码。</string>
+    <string name="welcome_btn_start">开始使用</string>
+
+    <string name="about_slogan">为非专业用户打造的简易性能面板</string>
+
+    <string name="storage_ram_title">物理内存 (RAM)</string>
+    <string name="storage_ram_total">总容量</string>
+    <string name="storage_ram_used">已使用</string>
+    <string name="storage_ram_available">可用</string>
+    <string name="storage_swap_total">虚拟内存总量</string>
+    <string name="storage_swap_used">虚拟内存已用</string>
+    <string name="storage_swap_available">虚拟内存可用</string>
+    <string name="storage_partitions_title">存储分区</string>
+    <string name="storage_partitions_empty">无法读取存储分区信息</string>
+    <string name="storage_partitions_partial">部分分区需 Shizuku / Root 权限才能显示</string>
+    <string name="storage_source_hint">数据来源：%1$s</string>
+    <string name="storage_available_format">可用 %1$s · 使用率 %2$s</string>
+    <string name="via_root">Root</string>
+    <string name="via_shizuku">Shizuku</string>
+
+    <string name="storage_internal">内部存储</string>
+    <string name="storage_sd_card">SD 卡</string>
+
+    <string name="app_starting">应用正在启动，请稍候</string>
+
+    <string name="loading">正在读取</string>
+    <string name="storage_partitions_loading">正在读取存储分区…</string>
+
+    <string name="overview_tab">概览</string>
+    <string name="tile_battery">电量</string>
+    <string name="tile_cpu">CPU</string>
+    <string name="tile_ram">内存</string>
+    <string name="tile_temp">温度</string>
+    <string name="tile_refresh">刷新率</string>
+    <string name="tile_network">网络</string>
+    <string name="overview_charts">实时曲线</string>
+    <string name="chart_cpu">CPU 使用率</string>
+    <string name="chart_battery">电池电量</string>
+    <string name="chart_power">充电功率</string>
+    <string name="network_title">网络状态</string>
+    <string name="network_not_connected">未连接网络</string>
+    <string name="network_unknown">未知</string>
+
+    <string name="satellite_tab">卫星</string>
+    <string name="satellite_fix_waiting">等待定位…</string>
+    <string name="satellite_fix_searching">定位中…</string>
+    <string name="satellite_fix_located">已定位</string>
+    <string name="satellite_update_time">更新：%1$s</string>
+    <string name="satellite_list_title">卫星连接</string>
+    <string name="satellite_list_empty">尚未连接到卫星</string>
+    <string name="satellite_total">参与定位 %1$d 颗 · 可见 %2$d 颗</string>
+    <string name="satellite_position_title">位置信息</string>
+    <string name="satellite_latitude">纬度</string>
+    <string name="satellite_longitude">经度</string>
+    <string name="satellite_altitude">高度</string>
+    <string name="satellite_msl_altitude">海平面高度</string>
+    <string name="satellite_speed">速度</string>
+    <string name="satellite_comm_title">卫星通信支持</string>
+    <string name="satellite_comm_supported">支持</string>
+    <string name="satellite_comm_unsupported">不支持</string>
+    <string name="satellite_comm_unknown">未知（需 Android 14+）</string>
+    <string name="satellite_permission_denied">未授予定位权限，无法获取卫星信息</string>
+    <string name="satellite_permission_btn">授予定位权限</string>
+    <string name="satellite_gps_disabled">GPS 定位未开启，请开启定位后重试</string>
+</resources>
