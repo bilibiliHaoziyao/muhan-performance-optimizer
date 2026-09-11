@@ -28,6 +28,7 @@ import com.google.android.material.color.MaterialColors
 import com.muhan.socbatteryinfo.service.FloatingWindowService
 import com.muhan.socbatteryinfo.service.IslandService
 import com.muhan.socbatteryinfo.service.LiveUpdateService
+import com.muhan.socbatteryinfo.service.OptimizeService
 import com.muhan.socbatteryinfo.service.VivoAtomicService
 import com.muhan.socbatteryinfo.util.CpuReader
 import com.muhan.socbatteryinfo.util.DisplayMode
@@ -44,6 +45,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var tvRootStatus: TextView
     private lateinit var tvShizukuStatus: TextView
     private lateinit var switchMonet: SwitchCompat
+    private lateinit var switchBackgroundMonitor: SwitchCompat
 
     private val floatCheckboxes = mutableMapOf<String, CheckBox>()
 
@@ -95,6 +97,8 @@ class SettingsActivity : AppCompatActivity() {
         setupThemePicker()
 
         setupMonetSwitch()
+
+        setupBackgroundMonitorSwitch()
 
         findViewById<Button>(R.id.btnReRoot).setOnClickListener { reRequestRoot() }
         findViewById<Button>(R.id.btnShizuku).setOnClickListener { requestShizuku() }
@@ -155,6 +159,16 @@ class SettingsActivity : AppCompatActivity() {
                 }
             } else {
                 applyModeSelection(DisplayMode.NONE)
+                Toast.makeText(this, R.string.notify_permission_denied, Toast.LENGTH_SHORT).show()
+            }
+        } else if (requestCode == REQ_NOTIFY_FOR_MONITOR) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 授权成功，真正启动后台监控服务
+                ContextCompat.startForegroundService(this, Intent(this, OptimizeService::class.java))
+            } else {
+                // 通知权限被拒：回滚开关与设置，避免"显示已开启但服务未运行"
+                switchBackgroundMonitor.isChecked = false
+                Prefs.setAutoCleanEnabled(this, false)
                 Toast.makeText(this, R.string.notify_permission_denied, Toast.LENGTH_SHORT).show()
             }
         }
@@ -373,6 +387,44 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    // ---------- 后台监控（OptimizeService） ----------
+
+    private fun setupBackgroundMonitorSwitch() {
+        switchBackgroundMonitor = findViewById(R.id.switchBackgroundMonitor)
+        switchBackgroundMonitor.isChecked = Prefs.isAutoCleanEnabled(this)
+        switchBackgroundMonitor.setOnCheckedChangeListener { _, isChecked ->
+            Prefs.setAutoCleanEnabled(this, isChecked)
+            if (isChecked) {
+                startBackgroundMonitor()
+            } else {
+                stopBackgroundMonitor()
+            }
+        }
+    }
+
+    /** 启动后台监控：需要通知权限才能运行前台服务 */
+    private fun startBackgroundMonitor() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            !hasNotificationPermission()
+        ) {
+            requestNotificationPermissionForMonitor()
+            return
+        }
+        ContextCompat.startForegroundService(this, Intent(this, OptimizeService::class.java))
+    }
+
+    private fun stopBackgroundMonitor() {
+        stopService(Intent(this, OptimizeService::class.java))
+    }
+
+    private fun requestNotificationPermissionForMonitor() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+            REQ_NOTIFY_FOR_MONITOR
+        )
+    }
+
     // ---------- Root ----------
 
     private fun updateRootStatus() {
@@ -451,6 +503,7 @@ class SettingsActivity : AppCompatActivity() {
     companion object {
         private const val REQ_NOTIFY = 2001
         private const val REQ_SHIZUKU = 2002
+        private const val REQ_NOTIFY_FOR_MONITOR = 2003
         /** 莫奈取色开关防抖重建延迟：等待开关动画结束，并将连续切换合并为一次重建 */
         private const val MONET_RECREATE_DELAY_MS = 300L
     }

@@ -300,11 +300,13 @@ class OptimizeFragment : Fragment() {
     private fun loadUserApps(context: Context): List<UserApp> {
         return try {
             val pm = context.packageManager
-            pm.getInstalledApplications(PackageManager.GET_META_DATA)
+            pm.getInstalledApplications(android.content.pm.ApplicationInfo.FLAG_INSTALLED or android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)
                 .filter { app ->
+                    app.sourceDir != null &&
                     app.packageName != context.packageName &&
-                        (app.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) == 0 &&
-                        (app.flags and android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0
+                    // 第三方应用：非系统应用或更新过的系统应用
+                    ((app.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) == 0 ||
+                        (app.flags and android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)
                 }
                 .map { app ->
                     UserApp(

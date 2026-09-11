@@ -106,11 +106,14 @@ class AppManageActivity : AppCompatActivity() {
     private fun queryThirdPartyApps(): List<AppEntry> {
         return try {
             val pm = packageManager
-            pm.getInstalledApplications(0)
+            pm.getInstalledApplications(android.content.pm.ApplicationInfo.FLAG_INSTALLED or android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)
                 .filter { app ->
+                    // 必须有安装路径（排除未完成安装的）
+                    app.sourceDir != null &&
                     app.packageName != packageName &&
-                        (app.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) == 0 &&
-                        (app.flags and android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0
+                    // 第三方应用：非系统应用或更新过的系统应用
+                    ((app.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) == 0 ||
+                        (app.flags and android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)
                 }
                 .map { app ->
                     AppEntry(

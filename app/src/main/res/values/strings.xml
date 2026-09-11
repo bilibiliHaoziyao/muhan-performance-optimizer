@@ -114,6 +114,10 @@
     <string name="overlay_permission_denied">未授予悬浮窗权限，无法显示悬浮窗</string>
 
     <string name="settings_title">设置</string>
+
+    <string name="background_monitor_label">后台监控</string>
+    <string name="background_monitor_desc">开启后，每 3 分钟自动检查运存占用，超过阈值时清理后台进程</string>
+
     <string name="root_status">Root 状态</string>
     <string name="root_granted">已获取 Root 权限</string>
     <string name="root_missing">未获取 Root 权限</string>

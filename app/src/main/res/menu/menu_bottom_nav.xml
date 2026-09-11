@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 底部导航菜单：优化 / 概览 / SOC / 系统 / 电池 -->
+<!-- 底部导航菜单：优化 / 概览 / 存储 / 系统 / 屏幕 / SOC / 电池 / 卫星 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_optimize"
@@ -10,15 +10,27 @@
         android:icon="@drawable/ic_nav_overview"
         android:title="@string/overview_tab" />
     <item
-        android:id="@+id/nav_soc"
-        android:icon="@drawable/ic_nav_soc"
-        android:title="@string/tab_soc" />
+        android:id="@+id/nav_storage"
+        android:icon="@drawable/ic_nav_storage"
+        android:title="@string/tab_storage" />
     <item
         android:id="@+id/nav_system"
         android:icon="@drawable/ic_nav_system"
         android:title="@string/tab_system" />
     <item
+        android:id="@+id/nav_screen"
+        android:icon="@drawable/ic_nav_screen"
+        android:title="@string/tab_screen" />
+    <item
+        android:id="@+id/nav_soc"
+        android:icon="@drawable/ic_nav_soc"
+        android:title="@string/tab_soc" />
+    <item
         android:id="@+id/nav_battery"
         android:icon="@drawable/ic_nav_battery"
         android:title="@string/tab_battery" />
+    <item
+        android:id="@+id/nav_satellite"
+        android:icon="@drawable/ic_nav_satellite"
+        android:title="@string/satellite_tab" />
 </menu>

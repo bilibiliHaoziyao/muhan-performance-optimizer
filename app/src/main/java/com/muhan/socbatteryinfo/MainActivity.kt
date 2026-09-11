@@ -38,33 +38,27 @@ class MainActivity : AppCompatActivity() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
 
         viewPager.adapter = ViewPagerAdapter(this)
-        // 底部导航切换页面（底部导航覆盖 0-4 五个主页面）
+        // 禁用左右滑动切换Tab，只允许通过底部导航点击切换
+        viewPager.isUserInputEnabled = false
+
+        // 底部导航切换页面（所有8个页面都在底部导航里）
         bottomNav.setOnItemSelectedListener { item ->
             viewPager.setCurrentItem(
                 when (item.itemId) {
+                    R.id.nav_optimize -> 0
                     R.id.nav_overview -> 1
-                    R.id.nav_soc -> 2
+                    R.id.nav_storage -> 2
                     R.id.nav_system -> 3
-                    R.id.nav_battery -> 4
+                    R.id.nav_screen -> 4
+                    R.id.nav_soc -> 5
+                    R.id.nav_battery -> 6
+                    R.id.nav_satellite -> 7
                     else -> 0
                 },
-                true
+                false
             )
             true
         }
-        // 滑动页面时同步底部导航选中态（5-7 为溢出菜单页面，不改变底部高亮）
-        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                if (position > 4) return
-                bottomNav.selectedItemId = when (position) {
-                    1 -> R.id.nav_overview
-                    2 -> R.id.nav_soc
-                    3 -> R.id.nav_system
-                    4 -> R.id.nav_battery
-                    else -> R.id.nav_optimize
-                }
-            }
-        })
 
         requestRoot()
     }
@@ -78,18 +72,6 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
-                true
-            }
-            R.id.action_screen -> {
-                findViewById<ViewPager2>(R.id.viewPager).setCurrentItem(5, true)
-                true
-            }
-            R.id.action_storage -> {
-                findViewById<ViewPager2>(R.id.viewPager).setCurrentItem(6, true)
-                true
-            }
-            R.id.action_satellite -> {
-                findViewById<ViewPager2>(R.id.viewPager).setCurrentItem(7, true)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -124,12 +106,13 @@ class MainActivity : AppCompatActivity() {
             return when (position) {
                 0 -> OptimizeFragment()
                 1 -> OverviewFragment()
-                2 -> SocFragment()
+                2 -> StorageFragment()
                 3 -> SystemFragment()
-                4 -> BatteryFragment()
-                5 -> ScreenFragment()
-                6 -> StorageFragment()
-                else -> SatelliteFragment()
+                4 -> ScreenFragment()
+                5 -> SocFragment()
+                6 -> BatteryFragment()
+                7 -> SatelliteFragment()
+                else -> OptimizeFragment()
             }
         }
     }
