@@ -40,11 +40,22 @@ import com.muhan.socbatteryinfo.util.Prefs
 class VivoAtomicService : Service() {
 
     private val handler = Handler(Looper.getMainLooper())
+    private val worker = java.util.concurrent.Executors.newSingleThreadExecutor()
     @Volatile private var posted = false
+    @Volatile private var updateInFlight = false
 
     private val refreshRunnable = object : Runnable {
         override fun run() {
-            update()
+            if (!updateInFlight) {
+                updateInFlight = true
+                worker.execute {
+                    try {
+                        update()
+                    } finally {
+                        updateInFlight = false
+                    }
+                }
+            }
             handler.postDelayed(this, REFRESH_INTERVAL_MS)
         }
     }
@@ -71,6 +82,7 @@ class VivoAtomicService : Service() {
 
     override fun onDestroy() {
         handler.removeCallbacks(refreshRunnable)
+        worker.shutdownNow()
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.cancel(NOTIFICATION_ID)
         super.onDestroy()

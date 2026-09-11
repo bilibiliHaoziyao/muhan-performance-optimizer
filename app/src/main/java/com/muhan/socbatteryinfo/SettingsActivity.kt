@@ -1,6 +1,7 @@
 package com.muhan.socbatteryinfo
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -118,10 +119,12 @@ class SettingsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateRootStatus()
-        // 从悬浮窗授权页返回后，若当前方式仍为悬浮窗则真正启动
+        // 从悬浮窗授权页返回后，若当前方式仍为悬浮窗则真正启动（已在运行则不重复启动，避免位置重置与通知重复）
         if (Prefs.getDisplayMode(this) == DisplayMode.FLOATING) {
             if (canOverlay()) {
-                startFloating()
+                if (!isServiceRunning(FloatingWindowService::class.java)) {
+                    startFloating()
+                }
             } else {
                 applyModeSelection(DisplayMode.NONE)
                 Toast.makeText(this, R.string.overlay_permission_denied, Toast.LENGTH_SHORT).show()
@@ -230,6 +233,16 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun canOverlay(): Boolean {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(this)
+    }
+
+    /** 服务是否正在运行（getRunningServices 会返回本应用自己的前台服务） */
+    private fun isServiceRunning(service: Class<*>): Boolean {
+        return try {
+            val am = getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+            am.getRunningServices(100).any { it.service.className == service.name }
+        } catch (_: Exception) {
+            false
+        }
     }
 
     private fun requestOverlayPermission() {

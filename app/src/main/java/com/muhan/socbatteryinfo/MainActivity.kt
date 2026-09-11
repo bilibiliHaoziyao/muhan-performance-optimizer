@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** 每次启动自动申请 Root，并按 Root / Shizuku 缺失组合给出提示 */
+    /** 每次启动自动申请 Root；权限缺失提示仅首次展示，避免每次进入都打扰 */
     private fun requestRoot() {
         Thread {
             val root = RootShell.requestRoot()
@@ -109,7 +109,8 @@ class MainActivity : AppCompatActivity() {
                     root && !shizuku -> R.string.missing_shizuku_toast
                     else -> null
                 }
-                if (msgRes != null) {
+                if (msgRes != null && !Prefs.isPermHintShown(this@MainActivity)) {
+                    Prefs.setPermHintShown(this@MainActivity)
                     Toast.makeText(this@MainActivity, msgRes, Toast.LENGTH_LONG).show()
                 }
             }

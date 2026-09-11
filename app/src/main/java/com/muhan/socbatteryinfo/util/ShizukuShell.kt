@@ -2,6 +2,7 @@ package com.muhan.socbatteryinfo.util
 
 import android.content.pm.PackageManager
 import android.os.ParcelFileDescriptor
+import moe.shizuku.server.IRemoteProcess
 import moe.shizuku.server.IShizukuService
 import rikka.shizuku.Shizuku
 
@@ -41,7 +42,12 @@ object ShizukuShell {
         if (!isGranted()) return null
         return try {
             val service = IShizukuService.Stub.asInterface(Shizuku.getBinder())
-            val process = service.newProcess(arrayOf("sh", "-c", command), null, null)
+            // stderr 合并到 stdout，避免管道缓冲写满导致死锁；带超时防止挂起
+            val process = service.newProcess(arrayOf("sh", "-c", "$command 2>&1"), null, null)
+            if (!waitForTimeout(process, ShellExec.DEFAULT_TIMEOUT_MS)) {
+                destroyProcess(process)
+                return null
+            }
             val out = ParcelFileDescriptor.AutoCloseInputStream(process.getInputStream())
                 .bufferedReader()
                 .readText()
@@ -49,13 +55,39 @@ object ShizukuShell {
                 process.getErrorStream().close()
             } catch (_: Exception) {
             }
-            try {
-                process.waitFor()
-            } catch (_: Exception) {
-            }
             out.trim().ifEmpty { null }
         } catch (_: Exception) {
             null
+        }
+    }
+
+    /** 等待 Shizuku 远端进程结束（IRemoteProcess 仅提供阻塞 waitFor()，这里用 exitValue 轮询实现超时） */
+    private fun waitForTimeout(process: IRemoteProcess, timeoutMs: Long): Boolean {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            if (!isAlive(process)) return true
+            try {
+                Thread.sleep(50)
+            } catch (_: InterruptedException) {
+                return !isAlive(process)
+            }
+        }
+        return !isAlive(process)
+    }
+
+    private fun isAlive(process: IRemoteProcess): Boolean = try {
+        process.exitValue()
+        false
+    } catch (_: IllegalThreadStateException) {
+        true
+    } catch (_: Exception) {
+        false
+    }
+
+    private fun destroyProcess(process: IRemoteProcess) {
+        try {
+            process.destroy()
+        } catch (_: Exception) {
         }
     }
 }

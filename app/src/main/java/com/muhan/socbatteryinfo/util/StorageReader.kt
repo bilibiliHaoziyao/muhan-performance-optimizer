@@ -130,27 +130,19 @@ object StorageReader {
         return result
     }
 
-    private fun execDf(): String? {
-        return try {
-            val process = Runtime.getRuntime().exec(arrayOf("sh", "-c", "df -k"))
-            val out = process.inputStream.bufferedReader().readText()
-            process.errorStream.close()
-            process.waitFor()
-            out.trim().ifEmpty { null }
-        } catch (_: Exception) {
-            null
-        }
-    }
+    private fun execDf(): String? = ShellExec.execSh("df -k")
 
     private fun shouldShowPartition(filesystem: String, mountPoint: String): Boolean {
         if (mountPoint.isEmpty()) return false
-        val skipMounts = listOf(
+        val skipPrefixes = listOf(
             "/proc", "/sys", "/dev", "/system", "/vendor",
-            "/product", "/odm", "/cache", "/metadata", "/mnt"
+            "/product", "/odm", "/cache", "/metadata"
         )
-        for (skip in skipMounts) {
+        for (skip in skipPrefixes) {
             if (mountPoint.startsWith(skip)) return false
         }
+        // 仅精确跳过根挂载点 /mnt，放行 /mnt/expand（外置 SD 卡）
+        if (mountPoint == "/mnt") return false
         val skipFs = listOf("tmpfs", "devtmpfs", "overlay", "squashfs", "fuse")
         for (fs in skipFs) {
             if (filesystem.startsWith(fs)) return false

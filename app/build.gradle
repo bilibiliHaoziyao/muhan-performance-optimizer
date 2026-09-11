@@ -26,10 +26,12 @@ android {
 
     signingConfigs {
         release {
-            storeFile file('../release.keystore')
-            storePassword 'android'
-            keyAlias 'muhan'
-            keyPassword 'android'
+            // keystore 不提交到仓库：本地默认 ../release.keystore，
+            // CI 可通过环境变量注入（RELEASE_STORE_FILE / RELEASE_STORE_PASSWORD / RELEASE_KEY_ALIAS / RELEASE_KEY_PASSWORD）
+            storeFile file(System.getenv("RELEASE_STORE_FILE") ?: '../release.keystore')
+            storePassword System.getenv("RELEASE_STORE_PASSWORD") ?: 'android'
+            keyAlias System.getenv("RELEASE_KEY_ALIAS") ?: 'muhan'
+            keyPassword System.getenv("RELEASE_KEY_PASSWORD") ?: 'android'
         }
     }
 
@@ -40,8 +42,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            // 使用发布签名，避免生成测试签名 APK
-            signingConfig signingConfigs.release
+            // 使用默认调试签名，克隆仓库后无需 keystore 即可构建调试包
         }
     }
 

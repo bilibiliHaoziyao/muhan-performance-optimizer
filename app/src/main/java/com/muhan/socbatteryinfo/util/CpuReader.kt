@@ -186,16 +186,37 @@ object CpuReader {
         return (khz / 1000L).toInt()
     }
 
+    /** 已探测到的读取通道缓存：core -> (路径, 通道)，避免每秒为每核反复尝试多种方式（尤其避免重复起 shell 进程） */
+    private val freqChannelCache = HashMap<Int, Pair<String, String>>()
+
     private fun readCpuFreqKhz(cpu: Int): Long? {
+        val cached = synchronized(freqChannelCache) { freqChannelCache[cpu] }
+        if (cached != null) {
+            val (path, channel) = cached
+            return when (channel) {
+                "shizuku" -> ShizukuShell.exec("cat $path")?.toLongOrNull()?.takeIf { it > 0 }
+                "root" -> RootShell.exec("cat $path")?.toLongOrNull()?.takeIf { it > 0 }
+                else -> ThermalReader.readFile(path)?.toLongOrNull()?.takeIf { it > 0 }
+            }
+        }
         val candidates = listOf(
             "/sys/devices/system/cpu/cpu$cpu/cpufreq/scaling_cur_freq",
             "/sys/devices/system/cpu/cpu$cpu/cpufreq/cpuinfo_cur_freq"
         )
         for (path in candidates) {
-            ThermalReader.readFile(path)?.toLongOrNull()?.let { if (it > 0) return it }
-            ShizukuShell.exec("cat $path")?.toLongOrNull()?.let { if (it > 0) return it }
+            ThermalReader.readFile(path)?.toLongOrNull()?.takeIf { it > 0 }?.let {
+                synchronized(freqChannelCache) { freqChannelCache[cpu] = path to "file" }
+                return it
+            }
+            ShizukuShell.exec("cat $path")?.toLongOrNull()?.takeIf { it > 0 }?.let {
+                synchronized(freqChannelCache) { freqChannelCache[cpu] = path to "shizuku" }
+                return it
+            }
             if (RootShell.granted) {
-                RootShell.exec("cat $path")?.toLongOrNull()?.let { if (it > 0) return it }
+                RootShell.exec("cat $path")?.toLongOrNull()?.takeIf { it > 0 }?.let {
+                    synchronized(freqChannelCache) { freqChannelCache[cpu] = path to "root" }
+                    return it
+                }
             }
         }
         return null
@@ -268,15 +289,17 @@ object CpuCoreSampler {
         val lines = stat.lines()
         val snapshots = ArrayList<CpuCoreSnapshot>(coreCount)
 
-        for (i in 0 until coreCount) {
-            val line = lines.firstOrNull { it.trim().startsWith("cpu$i ") }
-            val usage = parseCoreUsage(i, line)
-            val freq = CpuReader.readFreqMhzForCore(i)
-            snapshots.add(CpuCoreSnapshot(i, usage, freq))
-        }
-
-        // 如果没有找到 per-core 行，回退到整体行拆分（罕见 ROM）
-        if (snapshots.isEmpty()) {
+        // 显式检测是否存在 per-core 行，避免 for 循环空添加导致回退逻辑永不触发
+        val hasPerCore = lines.any { it.trim().matches(Regex("cpu\\d+\\s+.*")) }
+        if (hasPerCore) {
+            for (i in 0 until coreCount) {
+                val line = lines.firstOrNull { it.trim().startsWith("cpu$i ") }
+                val usage = parseCoreUsage(i, line)
+                val freq = CpuReader.readFreqMhzForCore(i)
+                snapshots.add(CpuCoreSnapshot(i, usage, freq))
+            }
+        } else {
+            // 没有 per-core 行的罕见 ROM：按整体行均分
             val totalLine = lines.firstOrNull { it.trim().startsWith("cpu ") }
             if (totalLine != null) {
                 val parts = totalLine.trim().split(Regex("\\s+")).drop(1).mapNotNull { it.toLongOrNull() }

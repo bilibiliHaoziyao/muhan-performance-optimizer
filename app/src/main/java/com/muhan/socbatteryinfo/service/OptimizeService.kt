@@ -26,6 +26,7 @@ import com.muhan.socbatteryinfo.util.Prefs
 class OptimizeService : Service() {
 
     private val handler = Handler(Looper.getMainLooper())
+    private val worker = java.util.concurrent.Executors.newSingleThreadExecutor()
 
     private val checkRunnable = object : Runnable {
         override fun run() {
@@ -41,6 +42,11 @@ class OptimizeService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
+        // 系统重启服务（intent 为 null）或自动清理已关闭时不再常驻
+        if (!Prefs.isAutoCleanEnabled(this)) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
         createChannel()
         startAsForeground(buildNotification(0, null))
         handler.removeCallbacks(checkRunnable)
@@ -50,24 +56,31 @@ class OptimizeService : Service() {
 
     override fun onDestroy() {
         handler.removeCallbacks(checkRunnable)
+        worker.shutdownNow()
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.cancel(NOTIFICATION_ID)
         super.onDestroy()
     }
 
+    /** 检查与清理均在后台线程执行，避免主线程周期性做枚举 + 数百次 binder 调用导致 ANR */
     private fun checkAndClean() {
-        val usage = MemoryCleaner.usagePercent()?.toInt()
-        var cleaned = 0
-        val autoClean = Prefs.isAutoCleanEnabled(this)
-        if (autoClean && usage != null && usage >= Prefs.getCleanThreshold(this)) {
-            cleaned = MemoryCleaner.cleanBackgroundProcesses(this, Prefs.getCleanWhitelist(this))
-            if (cleaned > 0) {
-                Prefs.incrementCleanStat(this)
-                notifyCleaned(cleaned)
+        worker.execute {
+            val usage = MemoryCleaner.usagePercent()?.toInt()
+            var cleaned = 0
+            val autoClean = Prefs.isAutoCleanEnabled(this@OptimizeService)
+            if (autoClean && usage != null && usage >= Prefs.getCleanThreshold(this@OptimizeService)) {
+                cleaned = MemoryCleaner.cleanBackgroundProcesses(
+                    this@OptimizeService,
+                    Prefs.getCleanWhitelist(this@OptimizeService)
+                )
+                if (cleaned > 0) {
+                    Prefs.incrementCleanStat(this@OptimizeService)
+                    notifyCleaned(cleaned)
+                }
             }
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.notify(NOTIFICATION_ID, buildNotification(cleaned, usage))
         }
-        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        manager.notify(NOTIFICATION_ID, buildNotification(cleaned, usage))
     }
 
     /** 清理完成后弹出独立通知，提示清理了多少进程 */

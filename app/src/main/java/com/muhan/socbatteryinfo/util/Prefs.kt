@@ -45,6 +45,7 @@ object Prefs {
     private const val KEY_THEME = "theme"
     private const val KEY_WELCOME_SHOWN = "welcome_shown"
     private const val KEY_MONET_ENABLED = "monet_enabled"
+    private const val KEY_PERM_HINT_SHOWN = "perm_hint_shown"
 
     // 运存优化
     private const val KEY_AUTO_CLEAN_ENABLED = "auto_clean_enabled"
@@ -128,6 +129,14 @@ object Prefs {
 
     fun setMonetEnabled(context: Context, enabled: Boolean) {
         sp(context).edit().putBoolean(KEY_MONET_ENABLED, enabled).apply()
+    }
+
+    /** Root/Shizuku 缺失提示是否已展示过（仅首次进入时提示，避免每次启动打扰） */
+    fun isPermHintShown(context: Context): Boolean =
+        sp(context).getBoolean(KEY_PERM_HINT_SHOWN, false)
+
+    fun setPermHintShown(context: Context) {
+        sp(context).edit().putBoolean(KEY_PERM_HINT_SHOWN, true).apply()
     }
 
     /** 应用主题（全局生效，需在 Activity onCreate 之前调用） */

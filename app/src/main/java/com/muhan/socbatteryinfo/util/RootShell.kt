@@ -35,10 +35,14 @@ object RootShell {
             os.writeBytes("exit\n")
             os.flush()
             os.close()
-            val out = process.inputStream.bufferedReader().readText()
-            process.errorStream.bufferedReader().readText()
-            process.waitFor()
-            out.contains("uid=0")
+            if (!ShellExec.waitForTimeout(process, 4000L)) {
+                ShellExec.destroyForcibly(process)
+                false
+            } else {
+                val out = process.inputStream.bufferedReader().readText()
+                process.errorStream.bufferedReader().readText()
+                out.contains("uid=0")
+            }
         } catch (_: Exception) {
             false
         }
@@ -52,18 +56,23 @@ object RootShell {
             // 某些 su 实现不支持 `su -c`，这里统一通过 stdin 管道传入命令，兼容性更好
             val process = Runtime.getRuntime().exec("su")
             val os = DataOutputStream(process.outputStream)
-            os.writeBytes("echo __ROOT_READ_BEGIN__\n")
-            os.writeBytes("$command\n")
-            os.writeBytes("echo __ROOT_READ_END__\n")
+            // 每次调用使用随机标记，避免命令自身输出包含固定标记导致解析错乱
+            val token = "ROOT_READ_${System.nanoTime()}_${(Math.random() * 1e6).toInt()}"
+            os.writeBytes("echo $token\n")
+            os.writeBytes("$command 2>&1\n")
+            os.writeBytes("echo $token\n")
             os.writeBytes("exit\n")
             os.flush()
             os.close()
+            if (!ShellExec.waitForTimeout(process, 4000L)) {
+                ShellExec.destroyForcibly(process)
+                return null
+            }
             val out = process.inputStream.bufferedReader().readText()
-            process.waitFor()
-            val begin = out.indexOf("__ROOT_READ_BEGIN__")
+            val begin = out.indexOf(token)
             if (begin < 0) return null
-            val rest = out.substring(begin + "__ROOT_READ_BEGIN__".length)
-            val end = rest.indexOf("__ROOT_READ_END__")
+            val rest = out.substring(begin + token.length)
+            val end = rest.indexOf(token)
             val result = (if (end >= 0) rest.substring(0, end) else rest).trim()
             result.ifEmpty { null }
         } catch (_: Exception) {

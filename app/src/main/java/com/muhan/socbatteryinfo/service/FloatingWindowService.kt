@@ -58,7 +58,7 @@ class FloatingWindowService : Service() {
                     }
                 }
             }
-            handler.postDelayed(this, 500L)
+            handler.postDelayed(this, REFRESH_INTERVAL_MS)
         }
     }
 
@@ -201,5 +201,7 @@ class FloatingWindowService : Service() {
     companion object {
         const val FLOATING_CHANNEL_ID = "floating_window_channel"
         const val FLOATING_NOTIFICATION_ID = 2
+        /** 刷新间隔：1 秒（避免持续高负载与耗电） */
+        private const val REFRESH_INTERVAL_MS = 1000L
     }
 }

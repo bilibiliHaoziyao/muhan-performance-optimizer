@@ -54,6 +54,7 @@ class OptimizeFragment : Fragment() {
     private lateinit var btnAppManage: Button
 
     private val handler = Handler(Looper.getMainLooper())
+    private val executor = Executors.newSingleThreadExecutor()
     private val ramHistory = ArrayDeque<Float>()
     private val MAX_POINTS = 60
 
@@ -156,6 +157,11 @@ class OptimizeFragment : Fragment() {
         handler.removeCallbacks(refreshRunnable)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        executor.shutdownNow()
+    }
+
     // ---------- 运存刷新 ----------
 
     private fun refreshRam() {
@@ -197,7 +203,6 @@ class OptimizeFragment : Fragment() {
     // ---------- 清理 ----------
 
     private fun cleanNow() {
-        val executor = java.util.concurrent.Executors.newSingleThreadExecutor()
         executor.execute {
             val cleared = MemoryCleaner.cleanBackgroundProcesses(
                 requireContext(),
@@ -252,8 +257,16 @@ class OptimizeFragment : Fragment() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQ_NOTIFY && swAutoClean.isChecked) {
-            startOptimizeService()
+        if (requestCode == REQ_NOTIFY) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (swAutoClean.isChecked) startOptimizeService()
+            } else {
+                // 通知权限被拒：回滚开关与设置，避免"显示已开启但服务未运行"
+                swAutoClean.isChecked = false
+                Prefs.setAutoCleanEnabled(requireContext(), false)
+                updateServiceStatus()
+                Toast.makeText(requireContext(), R.string.notify_permission_denied, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -313,7 +326,7 @@ class OptimizeFragment : Fragment() {
             .setMessage(R.string.optimize_whitelist_loading)
             .setNegativeButton(android.R.string.cancel, null)
             .show()
-        Executors.newSingleThreadExecutor().execute {
+        executor.execute {
             val apps = loadUserApps(context)
             val checked = Prefs.getCleanWhitelist(context).toMutableSet()
             handler.post {

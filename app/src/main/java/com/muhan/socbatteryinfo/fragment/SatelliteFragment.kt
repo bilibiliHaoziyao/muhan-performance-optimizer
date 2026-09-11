@@ -20,6 +20,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.muhan.socbatteryinfo.R
+import com.muhan.socbatteryinfo.util.ShellExec
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -108,6 +109,10 @@ class SatelliteFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         stopMonitoring()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
         executor.shutdownNow()
     }
 
@@ -260,7 +265,9 @@ class SatelliteFragment : Fragment() {
 
     /** 解析 NMEA GGA 句：$xxGGA,...,高度(M),M,大地水准面差距(M),M,... 取第 10 字段为海平面高度 */
     private fun parseNmea(message: String) {
-        if (!message.startsWith("$") || !message.endsWith("GGA")) return
+        // 真实 NMEA 句以校验和 *hh 结尾，GGA 是句首标识（如 $GPGGA 或 $BDGGA）
+        if (!message.startsWith("$")) return
+        if (message.split(",").firstOrNull()?.endsWith("GGA") != true) return
         val parts = message.split(",")
         if (parts.size <= 12) return
         val fixQuality = parts.getOrNull(6)?.toIntOrNull() ?: 0
@@ -306,15 +313,7 @@ class SatelliteFragment : Fragment() {
         return ctx.getString(R.string.satellite_comm_unknown)
     }
 
-    private fun readProp(name: String): String? = try {
-        val process = Runtime.getRuntime().exec(arrayOf("getprop", name))
-        val out = process.inputStream.bufferedReader().readText().trim()
-        process.errorStream.close()
-        process.waitFor()
-        out.ifEmpty { null }
-    } catch (_: Exception) {
-        null
-    }
+    private fun readProp(name: String): String? = ShellExec.execSh("getprop $name")
 
     private val constellationOrder = listOf(
         GnssStatus.CONSTELLATION_BEIDOU,
