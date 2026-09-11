@@ -37,6 +37,11 @@ class OptimizeService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    override fun onCreate() {
+        super.onCreate()
+        isRunning = true
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
             stopSelf()
@@ -57,6 +62,7 @@ class OptimizeService : Service() {
     override fun onDestroy() {
         handler.removeCallbacks(checkRunnable)
         worker.shutdownNow()
+        isRunning = false
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.cancel(NOTIFICATION_ID)
         super.onDestroy()
@@ -69,10 +75,11 @@ class OptimizeService : Service() {
             var cleaned = 0
             val autoClean = Prefs.isAutoCleanEnabled(this@OptimizeService)
             if (autoClean && usage != null && usage >= Prefs.getCleanThreshold(this@OptimizeService)) {
-                cleaned = MemoryCleaner.cleanBackgroundProcesses(
+                val result = MemoryCleaner.cleanBackgroundProcesses(
                     this@OptimizeService,
                     Prefs.getCleanWhitelist(this@OptimizeService)
                 )
+                cleaned = result.succeeded
                 if (cleaned > 0) {
                     Prefs.incrementCleanStat(this@OptimizeService)
                     notifyCleaned(cleaned)
@@ -173,5 +180,10 @@ class OptimizeService : Service() {
         const val NOTIFICATION_ID = 3
         const val NOTIFICATION_ID_CLEAN = 4
         const val CHECK_INTERVAL_MS = 3 * 60 * 1000L
+
+        /** 服务运行状态（getRunningServices 在 Android 8+ 对其他应用不可靠，这里由服务自身维护） */
+        @Volatile
+        var isRunning: Boolean = false
+            private set
     }
 }

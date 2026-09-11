@@ -5,10 +5,16 @@ import android.os.ParcelFileDescriptor
 import moe.shizuku.server.IRemoteProcess
 import moe.shizuku.server.IShizukuService
 import rikka.shizuku.Shizuku
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Shizuku（ADB Shell 权限）封装。
  * 通过 Shizuku 获取 shell 身份执行命令，用于普通权限与 Root 都无法获取的数据。
+ *
+ * stdout 在独立线程中流式读取，避免输出较大时管道缓冲写满导致远端进程阻塞、
+ * 被误判为超时。
  */
 object ShizukuShell {
 
@@ -37,25 +43,39 @@ object ShizukuShell {
         }
     }
 
-    /** 通过 Shizuku 的 ADB Shell 身份执行命令，未授权/失败返回 null */
+    /** 通过 Shizuku 的 ADB Shell 身份执行命令，未授权/失败/超时返回 null */
     fun exec(command: String): String? {
         if (!isGranted()) return null
         return try {
             val service = IShizukuService.Stub.asInterface(Shizuku.getBinder())
-            // stderr 合并到 stdout，避免管道缓冲写满导致死锁；带超时防止挂起
+            // stderr 合并到 stdout；输出异步读取，避免管道缓冲写满阻塞远端进程
             val process = service.newProcess(arrayOf("sh", "-c", "$command 2>&1"), null, null)
+            val output = AtomicReference("")
+            val readDone = CountDownLatch(1)
+            Thread {
+                try {
+                    output.set(
+                        ParcelFileDescriptor.AutoCloseInputStream(process.getInputStream())
+                            .bufferedReader()
+                            .readText()
+                    )
+                } catch (_: Exception) {
+                } finally {
+                    readDone.countDown()
+                }
+            }.apply { isDaemon = true }.start()
+
             if (!waitForTimeout(process, ShellExec.DEFAULT_TIMEOUT_MS)) {
                 destroyProcess(process)
+                readDone.await(500, TimeUnit.MILLISECONDS)
                 return null
             }
-            val out = ParcelFileDescriptor.AutoCloseInputStream(process.getInputStream())
-                .bufferedReader()
-                .readText()
+            readDone.await(1000, TimeUnit.MILLISECONDS)
             try {
                 process.getErrorStream().close()
             } catch (_: Exception) {
             }
-            out.trim().ifEmpty { null }
+            output.get().trim().ifEmpty { null }
         } catch (_: Exception) {
             null
         }

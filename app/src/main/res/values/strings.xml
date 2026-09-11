@@ -27,6 +27,7 @@
     <string name="optimize_clean_now">立即清理运存</string>
     <string name="optimize_clean_result">已清理 %1$d 个后台进程</string>
     <string name="optimize_clean_none">没有可清理的后台进程</string>
+    <string name="optimize_clean_unsupported">当前系统版本需要 Root 或 Shizuku 权限才能清理后台应用</string>
     <string name="optimize_clean_stat">今日已清理 %1$d 次</string>
     <string name="optimize_service_running">后台监控运行中</string>
     <string name="optimize_service_stopped">后台监控未运行</string>
@@ -151,7 +152,7 @@
     <string name="float_item_refresh">屏幕刷新率</string>
 
     <string name="about_developer">本软件由慕寒_Official开发</string>
-    <string name="about_version">版本 73.1.1</string>
+    <string name="about_version">版本 74.0</string>
     <string name="about_bilibili">我的哔哩哔哩</string>
     <string name="about_bilibili_url">https://b23.tv/SGGpYuN</string>
     <string name="about_bilibili_open_failed">无法打开浏览器</string>

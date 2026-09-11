@@ -203,23 +203,24 @@ class OptimizeFragment : Fragment() {
     // ---------- 清理 ----------
 
     private fun cleanNow() {
+        // 进入后台线程前先取 applicationContext，避免 Fragment 已销毁时 requireContext() 崩溃
+        val context = requireContext().applicationContext
+        val whitelist = Prefs.getCleanWhitelist(context)
         executor.execute {
-            val cleared = MemoryCleaner.cleanBackgroundProcesses(
-                requireContext(),
-                Prefs.getCleanWhitelist(requireContext())
-            )
-            if (cleared > 0) Prefs.incrementCleanStat(requireContext())
+            val result = MemoryCleaner.cleanBackgroundProcesses(context, whitelist)
+            if (result.succeeded > 0) Prefs.incrementCleanStat(context)
             handler.post {
                 if (!isAdded) return@post
-                Toast.makeText(
-                    requireContext(),
-                    if (cleared > 0) {
-                        getString(R.string.optimize_clean_result, cleared)
-                    } else {
+                val message = when {
+                    result.reason == MemoryCleaner.FailureReason.UNSUPPORTED ->
+                        getString(R.string.optimize_clean_unsupported)
+                    result.reason == MemoryCleaner.FailureReason.NO_CANDIDATES ->
                         getString(R.string.optimize_clean_none)
-                    },
-                    Toast.LENGTH_SHORT
-                ).show()
+                    result.succeeded > 0 ->
+                        getString(R.string.optimize_clean_result, result.succeeded)
+                    else -> getString(R.string.optimize_clean_none)
+                }
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 updateCleanStat()
                 refreshRam()
             }
@@ -271,16 +272,10 @@ class OptimizeFragment : Fragment() {
     }
 
     private fun updateServiceStatus() {
-        val running = isServiceRunning(OptimizeService::class.java)
+        // 由服务自身维护运行状态，getRunningServices 在 Android 8+ 对其他应用不可靠
         tvServiceStatus.text = getString(
-            if (running) R.string.optimize_service_running else R.string.optimize_service_stopped
+            if (OptimizeService.isRunning) R.string.optimize_service_running else R.string.optimize_service_stopped
         )
-    }
-
-    private fun isServiceRunning(service: Class<*>): Boolean {
-        val am = requireContext().getSystemService(Context.ACTIVITY_SERVICE)
-                as android.app.ActivityManager
-        return am.getRunningServices(100).any { it.service.className == service.name }
     }
 
     // ---------- 白名单 ----------

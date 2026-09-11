@@ -15,15 +15,21 @@ data class BatteryData(
     val temperatureC: Float?,
     val isCharging: Boolean
 ) {
-    /** 充电功率（W）。双电芯为串联，电压按 ×2 计算。 */
+    /**
+     * 充电功率（W）。
+     * 优先使用电池包电压（双电芯机型需要把电芯电压乘以串数）；
+     * 电压读取失败时才回退到「单电芯 ×2」的粗略估算。
+     */
     fun powerWatts(dualCell: Boolean): Double? {
         val mv = voltageMv ?: return null
         val ua = currentUa ?: return null
         // 电流符号因机型而异，这里用绝对值，再依据充电状态决定正负：
         // 充电为正，放电（功耗）为负
-        val voltageV = Math.abs(mv) / 1000.0 * (if (dualCell) 2.0 else 1.0)
+        val voltageV = Math.abs(mv) / 1000.0
         val currentA = Math.abs(ua) / 1_000_000.0
-        val magnitude = voltageV * currentA
+        // 双电芯串联机型：voltageMv 是单个电芯电压，需要乘 2 才是电池包电压
+        val packVoltageV = if (dualCell) voltageV * 2.0 else voltageV
+        val magnitude = packVoltageV * currentA
         return if (isCharging) magnitude else -magnitude
     }
 }
@@ -52,10 +58,15 @@ object BatteryReader {
         val currentRaw = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
         val currentUa = if (currentRaw != Int.MIN_VALUE) currentRaw.toDouble() else null
 
-        // 电压（mV），来自电池广播
+        // 电池广播（温度、充电状态也依赖它）
         val intent: Intent? = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-        val voltageFromIntent = intent?.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1) ?: -1
-        val voltageMv = if (voltageFromIntent > 0) voltageFromIntent.toDouble() else null
+
+        // 电压：优先 sysfs voltage_now（电池包电压，单位 µV），回退到电池广播 EXTRA_VOLTAGE（mV）
+        // sysfs 的 voltage_now 通常为电池包整体电压，双电芯机型无需再做倍乘
+        val voltageMv = readPackVoltageMv() ?: run {
+            val v = intent?.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1) ?: -1
+            if (v > 0) v.toDouble() else null
+        }
 
         // 电池温度：EXTRA_TEMPERATURE 单位为 0.1°C，失败则从热区读取
         val tempTenths = intent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Int.MIN_VALUE) ?: Int.MIN_VALUE
@@ -87,6 +98,25 @@ object BatteryReader {
         if (full == null || design == null || design <= 0 || full <= 0) return null
         val pct = (full / design * 100).toInt().coerceIn(0, 100)
         return BatteryHealth(full / 1000.0, design / 1000.0, pct) // µAh -> mAh
+    }
+
+    /** 从 sysfs 读取电池包电压（µV），返回 mV；读取失败返回 null */
+    private fun readPackVoltageMv(): Double? {
+        val paths = listOf(
+            "/sys/class/power_supply/battery/voltage_now",
+            "/sys/class/power_supply/battery/voltage_avg",
+            "/sys/class/power_supply/bms/voltage_now"
+        )
+        for (path in paths) {
+            val raw = ThermalReader.readFile(path)?.toDoubleOrNull() ?: continue
+            // voltage_now 单位为 µV，转换为 mV；个别 ROM 直接给 mV，做范围修正
+            var mv = raw / 1000.0
+            if (mv < 1000 || mv > 20000) {
+                mv = raw
+            }
+            if (mv in 1000.0..20000.0) return mv
+        }
+        return null
     }
 
     /** 设计容量（mAh）：优先隐藏 API PowerProfile，回退内核 sysfs */

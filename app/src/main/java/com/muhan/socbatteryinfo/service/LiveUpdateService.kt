@@ -131,8 +131,12 @@ class LiveUpdateService : Service() {
             .addAction(R.drawable.ic_notification, getString(R.string.stop_monitor), stopIntent)
             .build()
 
-        // 请求提升为实时动态（对应 Notification.EXTRA_REQUEST_PROMOTED_ONGOING，API 36）
-        notification.extras.putBoolean(EXTRA_REQUEST_PROMOTED_ONGOING, true)
+        // 请求提升为实时动态：EXTRA_REQUEST_PROMOTED_ONGOING 对应官方 Notification
+        // 常量（API 36.1 引入）。仅在 Android 16+（SDK 36+）写入该 extra，
+        // 旧系统忽略，避免无意义的兼容层模拟。
+        if (Build.VERSION.SDK_INT >= 36) {
+            notification.extras.putBoolean(EXTRA_REQUEST_PROMOTED_ONGOING, true)
+        }
         return notification
     }
 

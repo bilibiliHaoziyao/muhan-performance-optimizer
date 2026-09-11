@@ -18,15 +18,33 @@ object ThermalReader {
         }
     }
 
-    /** SoC 温度：取匹配 SoC 相关热区的最高温度（最热核心） */
-    fun readSocTemperature(): Float? {
-        val values = mutableListOf<Float>()
+    /** SoC 各热区温度详情 */
+    data class SocTempDetail(
+        /** 最热热区温度（用于概览展示） */
+        val maxTemp: Float,
+        /** 各热区名称到温度的映射（type -> 温度） */
+        val zones: Map<String, Float>
+    )
+
+    /**
+     * SoC 温度详情：返回最热热区温度及各热区明细。
+     * 避免把 GPU/NPU/DDR 等周边热区直接当作"SoC 芯片温度"展示。
+     */
+    fun readSocTemperatureDetail(): SocTempDetail? {
+        val zones = mutableMapOf<String, Float>()
         for (zone in thermalZones()) {
             val type = readFile(zone.path + "/type")?.lowercase() ?: continue
             if (!isSocType(type)) continue
-            readZoneTemp(zone.path)?.let { values.add(it) }
+            readZoneTemp(zone.path)?.let { zones[type] = it }
         }
-        return values.maxOrNull()
+        if (zones.isEmpty()) return null
+        val maxTemp = zones.values.maxOrNull() ?: return null
+        return SocTempDetail(maxTemp, zones)
+    }
+
+    /** SoC 温度：取匹配 SoC 相关热区的最高温度（最热核心） */
+    fun readSocTemperature(): Float? {
+        return readSocTemperatureDetail()?.maxTemp
     }
 
     /** 电池温度：优先电池/充电相关热区 */

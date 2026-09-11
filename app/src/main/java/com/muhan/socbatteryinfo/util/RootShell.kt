@@ -2,6 +2,9 @@ package com.muhan.socbatteryinfo.util
 
 import java.io.DataOutputStream
 import java.io.File
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 
 /** Root 权限获取与命令执行（阻塞调用，应在后台线程执行） */
 object RootShell {
@@ -30,6 +33,24 @@ object RootShell {
         }
         granted = try {
             val process = Runtime.getRuntime().exec("su")
+            // 输出异步读取，避免 su 输出过多导致管道阻塞
+            val stdout = AtomicReference("")
+            val readDone = CountDownLatch(1)
+            Thread {
+                try {
+                    stdout.set(process.inputStream.bufferedReader().readText())
+                } catch (_: Exception) {
+                } finally {
+                    readDone.countDown()
+                }
+            }.apply { isDaemon = true }.start()
+            Thread {
+                try {
+                    process.errorStream.bufferedReader().readText()
+                } catch (_: Exception) {
+                }
+            }.apply { isDaemon = true }.start()
+
             val os = DataOutputStream(process.outputStream)
             os.writeBytes("id\n")
             os.writeBytes("exit\n")
@@ -39,9 +60,8 @@ object RootShell {
                 ShellExec.destroyForcibly(process)
                 false
             } else {
-                val out = process.inputStream.bufferedReader().readText()
-                process.errorStream.bufferedReader().readText()
-                out.contains("uid=0")
+                readDone.await(500, TimeUnit.MILLISECONDS)
+                stdout.get().contains("uid=0")
             }
         } catch (_: Exception) {
             false
@@ -55,6 +75,23 @@ object RootShell {
         return try {
             // 某些 su 实现不支持 `su -c`，这里统一通过 stdin 管道传入命令，兼容性更好
             val process = Runtime.getRuntime().exec("su")
+            val stdout = AtomicReference("")
+            val readDone = CountDownLatch(1)
+            Thread {
+                try {
+                    stdout.set(process.inputStream.bufferedReader().readText())
+                } catch (_: Exception) {
+                } finally {
+                    readDone.countDown()
+                }
+            }.apply { isDaemon = true }.start()
+            Thread {
+                try {
+                    process.errorStream.bufferedReader().readText()
+                } catch (_: Exception) {
+                }
+            }.apply { isDaemon = true }.start()
+
             val os = DataOutputStream(process.outputStream)
             // 每次调用使用随机标记，避免命令自身输出包含固定标记导致解析错乱
             val token = "ROOT_READ_${System.nanoTime()}_${(Math.random() * 1e6).toInt()}"
@@ -68,7 +105,8 @@ object RootShell {
                 ShellExec.destroyForcibly(process)
                 return null
             }
-            val out = process.inputStream.bufferedReader().readText()
+            readDone.await(500, TimeUnit.MILLISECONDS)
+            val out = stdout.get()
             val begin = out.indexOf(token)
             if (begin < 0) return null
             val rest = out.substring(begin + token.length)

@@ -50,7 +50,7 @@
 # 调试包（如需正式签名请修改 debug 构建配置）
 gradle :app:assembleDebug
 
-# 发布包（使用 app/release.keystore 签名）
+# 发布包（使用项目根目录 release.keystore 签名，或通过环境变量 RELEASE_STORE_FILE 指定路径）
 gradle :app:assembleRelease
 ```
 
