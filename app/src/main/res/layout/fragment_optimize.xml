@@ -15,7 +15,7 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="20dp"
+            app:cardCornerRadius="8dp"
             app:cardElevation="0dp"
             app:strokeColor="?attr/colorOutlineVariant"
             app:strokeWidth="1dp">
@@ -92,7 +92,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            app:cardCornerRadius="20dp"
+            app:cardCornerRadius="8dp"
             app:cardElevation="0dp"
             app:strokeColor="?attr/colorOutlineVariant"
             app:strokeWidth="1dp">
@@ -217,7 +217,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            app:cardCornerRadius="20dp"
+            app:cardCornerRadius="8dp"
             app:cardElevation="0dp"
             app:strokeColor="?attr/colorOutlineVariant"
             app:strokeWidth="1dp">
@@ -256,6 +256,7 @@
 
                 <Button
                     android:id="@+id/btnAddWhitelist"
+                    style="@style/Widget.SocBatteryInfo.Fluent.Button.Outlined"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -268,7 +269,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            app:cardCornerRadius="20dp"
+            app:cardCornerRadius="8dp"
             app:cardElevation="0dp"
             app:strokeColor="?attr/colorOutlineVariant"
             app:strokeWidth="1dp">
@@ -326,6 +327,7 @@
 
                     <Button
                         android:id="@+id/btnBatteryPermission"
+                        style="@style/Widget.SocBatteryInfo.Fluent.Button.Outlined"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/optimize_battery_permission" />
@@ -362,6 +364,7 @@
 
                     <Button
                         android:id="@+id/btnUsageAccess"
+                        style="@style/Widget.SocBatteryInfo.Fluent.Button.Outlined"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/optimize_usage_access" />
@@ -374,7 +377,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            app:cardCornerRadius="20dp"
+            app:cardCornerRadius="8dp"
             app:cardElevation="0dp"
             app:strokeColor="?attr/colorOutlineVariant"
             app:strokeWidth="1dp">
@@ -403,6 +406,7 @@
 
                 <Button
                     android:id="@+id/btnAppManage"
+                    style="@style/Widget.SocBatteryInfo.Fluent.Button.Outlined"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"

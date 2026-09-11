@@ -98,6 +98,7 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnReRoot).setOnClickListener { reRequestRoot() }
         findViewById<Button>(R.id.btnShizuku).setOnClickListener { requestShizuku() }
         findViewById<Button>(R.id.btnBilibili).setOnClickListener { openBilibili() }
+        findViewById<Button>(R.id.btnOpenSource).setOnClickListener { openSource() }
         updateRootStatus()
         updateShizukuStatus()
 
@@ -411,6 +412,19 @@ class SettingsActivity : AppCompatActivity() {
     /** 使用系统默认浏览器打开哔哩哔哩主页 */
     private fun openBilibili() {
         val uri = Uri.parse(getString(R.string.about_bilibili_url))
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        try {
+            startActivity(intent)
+        } catch (_: Exception) {
+            Toast.makeText(this, R.string.about_bilibili_open_failed, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /** 打开 GitHub 开源仓库（MIT 协议） */
+    private fun openSource() {
+        val uri = Uri.parse(getString(R.string.about_open_source_url))
         val intent = Intent(Intent.ACTION_VIEW, uri).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }

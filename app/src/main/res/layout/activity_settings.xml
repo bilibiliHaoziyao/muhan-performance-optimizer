@@ -10,9 +10,9 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="?attr/colorSurface"
         android:theme="@style/ToolbarTheme"
-        app:titleTextColor="?attr/colorOnPrimary"
+        app:titleTextColor="?attr/colorOnSurface"
         app:popupTheme="@style/ToolbarTheme" />
 
     <ScrollView
@@ -296,6 +296,15 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
                 android:text="@string/about_bilibili" />
+
+            <Button
+                android:id="@+id/btnOpenSource"
+                style="@style/Widget.SocBatteryInfo.Fluent.Button.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dp"
+                android:text="@string/about_open_source" />
 
         </LinearLayout>
     </ScrollView>

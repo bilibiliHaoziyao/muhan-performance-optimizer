@@ -151,6 +151,8 @@
     <string name="about_bilibili">我的哔哩哔哩</string>
     <string name="about_bilibili_url">https://b23.tv/SGGpYuN</string>
     <string name="about_bilibili_open_failed">无法打开浏览器</string>
+    <string name="about_open_source">开源许可（MIT）</string>
+    <string name="about_open_source_url">https://github.com/bilibiliHaoziyao/muhan-performance-optimizer</string>
 
     <string name="welcome_title">欢迎使用慕寒性能优化</string>
     <string name="welcome_tagline">信息予你无限</string>
