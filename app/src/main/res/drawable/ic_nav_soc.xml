@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 底部导航：SOC（芯片） -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M7,7h10v10H7z M10,3h4v2h-4z M10,19h4v2h-4z M3,10h2v4H3z M19,10h2v4h-2z M10,10h4v4h-4z" />
+</vector>

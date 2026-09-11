@@ -21,21 +21,13 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <!-- 底部分隔线 -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/divider_light" />
-
-    <!-- 底部导航（Fluent：Tab 无圆角，指示条位于顶部） -->
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
-        style="@style/Widget.SocBatteryInfo.Material3.TabLayout"
+    <!-- Material Bottom Navigation（Fluent：Accent 色选中态，自动跟随动态取色） -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorSurface"
-        app:tabMode="scrollable"
-        app:tabPaddingStart="12dp"
-        app:tabPaddingEnd="12dp" />
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/menu_bottom_nav" />
 
 </LinearLayout>

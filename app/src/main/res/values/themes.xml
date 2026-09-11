@@ -85,14 +85,4 @@
         <item name="android:textColorPrimary">?attr/colorOnSurface</item>
         <item name="colorControlNormal">?attr/colorOnSurfaceVariant</item>
     </style>
-
-    <!-- TabLayout：指示色跟随主题（莫奈取色），选中背景使用动态容器色 -->
-    <style name="Widget.SocBatteryInfo.Material3.TabLayout" parent="Widget.MaterialComponents.TabLayout">
-        <item name="tabBackground">@drawable/bg_tab_selector</item>
-        <item name="tabTextColor">?attr/colorOnSurfaceVariant</item>
-        <item name="tabSelectedTextColor">?attr/colorPrimary</item>
-        <item name="tabIndicatorColor">?attr/colorPrimary</item>
-        <item name="tabIndicatorHeight">2dp</item>
-        <item name="tabIndicatorFullWidth">false</item>
-    </style>
 </resources>

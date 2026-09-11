@@ -8,4 +8,18 @@
         android:title="@string/settings_title"
         app:showAsAction="always" />
 
+    <!-- 其余页面入口（屏幕 / 存储 / 卫星），从溢出菜单切换 -->
+    <item
+        android:id="@+id/action_screen"
+        android:title="@string/tab_screen"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_storage"
+        android:title="@string/tab_storage"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_satellite"
+        android:title="@string/satellite_tab"
+        app:showAsAction="never" />
+
 </menu>

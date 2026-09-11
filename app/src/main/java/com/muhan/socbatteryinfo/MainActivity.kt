@@ -11,8 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.muhan.socbatteryinfo.fragment.BatteryFragment
 import com.muhan.socbatteryinfo.fragment.OptimizeFragment
 import com.muhan.socbatteryinfo.fragment.OverviewFragment
@@ -36,21 +35,36 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.title = getString(R.string.app_name)
 
         val viewPager = findViewById<ViewPager2>(R.id.viewPager)
-        val tabLayout = findViewById<TabLayout>(R.id.tabLayout)
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
 
         viewPager.adapter = ViewPagerAdapter(this)
-        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-            tab.text = when (position) {
-                0 -> getString(R.string.tab_optimize)
-                1 -> getString(R.string.overview_tab)
-                2 -> getString(R.string.tab_soc)
-                3 -> getString(R.string.tab_system)
-                4 -> getString(R.string.tab_battery)
-                5 -> getString(R.string.tab_screen)
-                6 -> getString(R.string.tab_storage)
-                else -> getString(R.string.satellite_tab)
+        // 底部导航切换页面（底部导航覆盖 0-4 五个主页面）
+        bottomNav.setOnItemSelectedListener { item ->
+            viewPager.setCurrentItem(
+                when (item.itemId) {
+                    R.id.nav_overview -> 1
+                    R.id.nav_soc -> 2
+                    R.id.nav_system -> 3
+                    R.id.nav_battery -> 4
+                    else -> 0
+                },
+                true
+            )
+            true
+        }
+        // 滑动页面时同步底部导航选中态（5-7 为溢出菜单页面，不改变底部高亮）
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                if (position > 4) return
+                bottomNav.selectedItemId = when (position) {
+                    1 -> R.id.nav_overview
+                    2 -> R.id.nav_soc
+                    3 -> R.id.nav_system
+                    4 -> R.id.nav_battery
+                    else -> R.id.nav_optimize
+                }
             }
-        }.attach()
+        })
 
         requestRoot()
     }
@@ -64,6 +78,18 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
+                true
+            }
+            R.id.action_screen -> {
+                findViewById<ViewPager2>(R.id.viewPager).setCurrentItem(5, true)
+                true
+            }
+            R.id.action_storage -> {
+                findViewById<ViewPager2>(R.id.viewPager).setCurrentItem(6, true)
+                true
+            }
+            R.id.action_satellite -> {
+                findViewById<ViewPager2>(R.id.viewPager).setCurrentItem(7, true)
                 true
             }
             else -> super.onOptionsItemSelected(item)

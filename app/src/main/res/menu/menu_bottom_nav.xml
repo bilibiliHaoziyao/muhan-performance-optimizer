@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 底部导航菜单：优化 / 概览 / SOC / 系统 / 电池 -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_optimize"
+        android:icon="@drawable/ic_nav_optimize"
+        android:title="@string/tab_optimize" />
+    <item
+        android:id="@+id/nav_overview"
+        android:icon="@drawable/ic_nav_overview"
+        android:title="@string/overview_tab" />
+    <item
+        android:id="@+id/nav_soc"
+        android:icon="@drawable/ic_nav_soc"
+        android:title="@string/tab_soc" />
+    <item
+        android:id="@+id/nav_system"
+        android:icon="@drawable/ic_nav_system"
+        android:title="@string/tab_system" />
+    <item
+        android:id="@+id/nav_battery"
+        android:icon="@drawable/ic_nav_battery"
+        android:title="@string/tab_battery" />
+</menu>
