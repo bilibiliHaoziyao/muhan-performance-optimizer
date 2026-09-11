@@ -10,12 +10,10 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
-import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
@@ -23,6 +21,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.materialswitch.MaterialSwitch
+import com.muhan.socbatteryinfo.AppManageActivity
 import com.muhan.socbatteryinfo.R
 import com.muhan.socbatteryinfo.service.OptimizeService
 import com.muhan.socbatteryinfo.util.MemoryCleaner
@@ -30,6 +29,7 @@ import com.muhan.socbatteryinfo.util.Prefs
 import com.muhan.socbatteryinfo.util.StorageReader
 import com.muhan.socbatteryinfo.view.LineChartView
 import java.util.ArrayDeque
+import java.util.concurrent.Executors
 
 /**
  * 优化 Tab：运存监控与自动清理。
@@ -50,6 +50,8 @@ class OptimizeFragment : Fragment() {
     private lateinit var tvWhitelist: TextView
     private lateinit var btnAddWhitelist: Button
     private lateinit var btnBatteryPermission: Button
+    private lateinit var btnUsageAccess: Button
+    private lateinit var btnAppManage: Button
 
     private val handler = Handler(Looper.getMainLooper())
     private val ramHistory = ArrayDeque<Float>()
@@ -88,6 +90,8 @@ class OptimizeFragment : Fragment() {
         tvWhitelist = view.findViewById(R.id.tvWhitelist)
         btnAddWhitelist = view.findViewById(R.id.btnAddWhitelist)
         btnBatteryPermission = view.findViewById(R.id.btnBatteryPermission)
+        btnUsageAccess = view.findViewById(R.id.btnUsageAccess)
+        btnAppManage = view.findViewById(R.id.btnAppManage)
 
         // 自动清理开关与阈值
         val threshold = Prefs.getCleanThreshold(requireContext())
@@ -117,13 +121,18 @@ class OptimizeFragment : Fragment() {
         }
 
         btnCleanNow.setOnClickListener { cleanNow() }
-        btnAddWhitelist.setOnClickListener { showAddWhitelistDialog() }
+        btnAddWhitelist.setOnClickListener { showWhitelistPicker() }
         tvWhitelist.setOnClickListener { showWhitelistPicker() }
         btnBatteryPermission.setOnClickListener { requestIgnoreBatteryOptimizations() }
+        btnUsageAccess.setOnClickListener { requestUsageAccess() }
+        btnAppManage.setOnClickListener {
+            startActivity(Intent(requireContext(), AppManageActivity::class.java))
+        }
 
         updateWhitelist()
         updateServiceStatus()
         updateBatteryPermissionText()
+        updateUsageAccessText()
         updateCleanStat()
     }
 
@@ -134,6 +143,7 @@ class OptimizeFragment : Fragment() {
         handler.postDelayed(refreshRunnable, 1000L)
         updateServiceStatus()
         updateBatteryPermissionText()
+        updateUsageAccessText()
     }
 
     override fun onPause() {
@@ -271,52 +281,92 @@ class OptimizeFragment : Fragment() {
         }
     }
 
-    private fun showAddWhitelistDialog() {
-        val input = EditText(requireContext()).apply {
-            hint = getString(R.string.optimize_whitelist_add_hint)
-            inputType = InputType.TYPE_CLASS_TEXT
-        }
-        AlertDialog.Builder(requireContext())
-            .setTitle(R.string.optimize_whitelist_dialog_title)
-            .setView(input)
-            .setPositiveButton(R.string.optimize_whitelist_add) { _, _ ->
-                val pkg = input.text.toString().trim()
-                if (pkg.isEmpty()) {
-                    Toast.makeText(requireContext(), R.string.optimize_whitelist_invalid, Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
+    private data class UserApp(val pkg: String, val label: String)
+
+    /** 列出所有第三方（非系统）应用 */
+    private fun loadUserApps(context: Context): List<UserApp> {
+        return try {
+            val pm = context.packageManager
+            pm.getInstalledApplications(PackageManager.GET_META_DATA)
+                .filter { app ->
+                    app.packageName != context.packageName &&
+                        (app.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) == 0 &&
+                        (app.flags and android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0
                 }
-                val whitelist = Prefs.getCleanWhitelist(requireContext()).toMutableSet()
-                whitelist.add(pkg)
-                Prefs.setCleanWhitelist(requireContext(), whitelist)
-                updateWhitelist()
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+                .map { app ->
+                    UserApp(
+                        app.packageName,
+                        pm.getApplicationLabel(app).toString()
+                    )
+                }
+                .sortedBy { it.label.lowercase() }
+        } catch (_: Exception) {
+            emptyList()
+        }
     }
 
+    /** 可视化白名单管理：列出所有用户安装的应用，勾选加入/移出白名单 */
     private fun showWhitelistPicker() {
-        val whitelist = Prefs.getCleanWhitelist(requireContext()).toList()
-        if (whitelist.isEmpty()) return
-        AlertDialog.Builder(requireContext())
-            .setTitle(R.string.optimize_whitelist)
-            .setItems(whitelist.toTypedArray()) { _, which ->
-                showRemoveWhitelistDialog(whitelist[which])
-            }
-            .show()
-    }
-
-    private fun showRemoveWhitelistDialog(pkg: String) {
-        AlertDialog.Builder(requireContext())
-            .setTitle(pkg)
-            .setMessage(R.string.optimize_whitelist_remove)
-            .setPositiveButton(R.string.optimize_whitelist_remove) { _, _ ->
-                val whitelist = Prefs.getCleanWhitelist(requireContext()).toMutableSet()
-                whitelist.remove(pkg)
-                Prefs.setCleanWhitelist(requireContext(), whitelist)
-                updateWhitelist()
-            }
+        val context = requireContext()
+        val loading = AlertDialog.Builder(context)
+            .setTitle(R.string.optimize_whitelist_select_title)
+            .setMessage(R.string.optimize_whitelist_loading)
             .setNegativeButton(android.R.string.cancel, null)
             .show()
+        Executors.newSingleThreadExecutor().execute {
+            val apps = loadUserApps(context)
+            val checked = Prefs.getCleanWhitelist(context).toMutableSet()
+            handler.post {
+                if (!isAdded) return@post
+                loading.dismiss()
+                val names = apps.map { it.label }
+                val selected = BooleanArray(apps.size) { checked.contains(apps[it].pkg) }
+                AlertDialog.Builder(context)
+                    .setTitle(R.string.optimize_whitelist_select_title)
+                    .setMultiChoiceItems(names.toTypedArray(), selected) { _, which, isChecked ->
+                        val pkg = apps[which].pkg
+                        if (isChecked) checked.add(pkg) else checked.remove(pkg)
+                    }
+                    .setPositiveButton(R.string.optimize_whitelist_add) { _, _ ->
+                        Prefs.setCleanWhitelist(context, checked)
+                        updateWhitelist()
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+            }
+        }
+    }
+
+    // ---------- 使用情况访问 ----------
+
+    private fun requestUsageAccess() {
+        if (MemoryCleaner.hasUsageStatsPermission(requireContext())) {
+            Toast.makeText(
+                requireContext(),
+                R.string.optimize_usage_access_granted,
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+        try {
+            startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+        } catch (_: Exception) {
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.optimize_usage_access),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    private fun updateUsageAccessText() {
+        btnUsageAccess.text = getString(
+            if (MemoryCleaner.hasUsageStatsPermission(requireContext())) {
+                R.string.optimize_usage_access_granted
+            } else {
+                R.string.optimize_usage_access
+            }
+        )
     }
 
     // ---------- 电池优化 ----------

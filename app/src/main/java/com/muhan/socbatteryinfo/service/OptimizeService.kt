@@ -61,10 +61,33 @@ class OptimizeService : Service() {
         val autoClean = Prefs.isAutoCleanEnabled(this)
         if (autoClean && usage != null && usage >= Prefs.getCleanThreshold(this)) {
             cleaned = MemoryCleaner.cleanBackgroundProcesses(this, Prefs.getCleanWhitelist(this))
-            if (cleaned > 0) Prefs.incrementCleanStat(this)
+            if (cleaned > 0) {
+                Prefs.incrementCleanStat(this)
+                notifyCleaned(cleaned)
+            }
         }
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(NOTIFICATION_ID, buildNotification(cleaned, usage))
+    }
+
+    /** 清理完成后弹出独立通知，提示清理了多少进程 */
+    private fun notifyCleaned(cleaned: Int) {
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val contentIntent = PendingIntent.getActivity(
+            this,
+            2,
+            Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(getString(R.string.optimize_clean_notify_title))
+            .setContentText(getString(R.string.optimize_clean_notify_body, cleaned))
+            .setAutoCancel(true)
+            .setContentIntent(contentIntent)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+        manager.notify(NOTIFICATION_ID_CLEAN, notification)
     }
 
     private fun buildNotification(cleaned: Int, usage: Int?): Notification {
@@ -135,6 +158,7 @@ class OptimizeService : Service() {
         const val ACTION_STOP = "com.muhan.socbatteryinfo.action.STOP_OPTIMIZE"
         const val CHANNEL_ID = "optimize_channel"
         const val NOTIFICATION_ID = 3
+        const val NOTIFICATION_ID_CLEAN = 4
         const val CHECK_INTERVAL_MS = 3 * 60 * 1000L
     }
 }

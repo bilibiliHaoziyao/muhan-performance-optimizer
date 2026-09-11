@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- 兼容无触摸屏设备（Android TV / Wear OS）与 Android TV Leanback -->
     <uses-feature
@@ -32,6 +33,10 @@
     <!-- 运存优化：清理后台进程与申请忽略电池优化 -->
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!-- 使用情况访问：更准确地识别后台应用（不读取使用记录） -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
 
     <application
         android:name=".App"
@@ -74,6 +79,11 @@
             android:name=".CpuCoreActivity"
             android:exported="false"
             android:label="@string/cpu_core_title" />
+
+        <activity
+            android:name=".AppManageActivity"
+            android:exported="false"
+            android:label="@string/app_manage_title" />
 
         <service
             android:name=".service.LiveUpdateService"

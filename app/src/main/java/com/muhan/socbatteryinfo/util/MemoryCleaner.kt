@@ -1,14 +1,43 @@
 package com.muhan.socbatteryinfo.util
 
 import android.app.ActivityManager
+import android.app.AppOpsManager
+import android.app.usage.UsageStatsManager
 import android.content.Context
+import android.os.Build
+import android.os.Process
 
 /**
  * 运存优化工具：
  * - usagePercent() 读取运存占用率（/proc/meminfo）
  * - cleanBackgroundProcesses() 清理后台进程（跳过自身、白名单、前台与系统进程）
+ * - hasUsageStatsPermission() 是否已授权「使用情况访问」权限
  */
 object MemoryCleaner {
+
+    /** 是否已授权「使用情况访问」权限（用于更准确地识别后台应用） */
+    fun hasUsageStatsPermission(context: Context): Boolean {
+        return try {
+            val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+            val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                appOps.unsafeCheckOpNoThrow(
+                    AppOpsManager.OPSTR_GET_USAGE_STATS,
+                    Process.myUid(),
+                    context.packageName
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                appOps.checkOpNoThrow(
+                    AppOpsManager.OPSTR_GET_USAGE_STATS,
+                    Process.myUid(),
+                    context.packageName
+                )
+            }
+            mode == AppOpsManager.MODE_ALLOWED
+        } catch (_: Exception) {
+            false
+        }
+    }
 
     /** 当前运存占用率（0-100），读取失败返回 null */
     fun usagePercent(): Float? {
@@ -66,17 +95,42 @@ object MemoryCleaner {
             .filter { it.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND }
             .flatMap { it.pkgList.toList() }
             .toSet()
+        // 有「使用情况访问」权限时，排除最近 3 分钟内使用过的应用（避免误杀刚使用过的应用）
+        val recentlyUsed = if (hasUsageStatsPermission(context)) {
+            recentlyUsedPackages(context, 3 * 60 * 1000L)
+        } else {
+            emptySet()
+        }
 
         for (info in processes) {
             if (info.importance > ActivityManager.RunningAppProcessInfo.IMPORTANCE_CACHED) continue
             for (pkg in info.pkgList) {
                 if (pkg in result) continue
                 if (pkg == self || pkg in whitelist || pkg in foregroundPackages) continue
+                if (pkg in recentlyUsed) continue
                 if (isSystemApp(context, pkg)) continue
                 result.add(pkg)
             }
         }
         return result.toList()
+    }
+
+    /** 查询最近 [windowMs] 毫秒内使用过的应用包名（需「使用情况访问」权限） */
+    private fun recentlyUsedPackages(context: Context, windowMs: Long): Set<String> {
+        return try {
+            val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+            val now = System.currentTimeMillis()
+            val stats = usm.queryUsageStats(
+                UsageStatsManager.INTERVAL_DAILY,
+                now - windowMs,
+                now
+            )
+            stats.filter { it.lastTimeUsed >= now - windowMs }
+                .map { it.packageName }
+                .toSet()
+        } catch (_: Exception) {
+            emptySet()
+        }
     }
 
     private fun isSystemApp(context: Context, pkg: String): Boolean {

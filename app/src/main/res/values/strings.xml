@@ -45,6 +45,25 @@
     <string name="optimize_notify_cleaned_suffix"> · 已清理 %1$d 个进程</string>
     <string name="optimize_permission_kill">清理后台进程权限</string>
     <string name="optimize_permission_kill_desc">系统已授予（KILL_BACKGROUND_PROCESSES）</string>
+    <string name="optimize_usage_access">使用情况访问权限</string>
+    <string name="optimize_usage_access_desc">用于更准确地识别可清理的后台应用（本软件不读取任何使用记录）</string>
+    <string name="optimize_usage_access_granted">已授权</string>
+    <string name="optimize_clean_notify_title">运存清理完成</string>
+    <string name="optimize_clean_notify_body">已清理 %1$d 个后台进程</string>
+    <string name="optimize_app_manage">应用管理</string>
+    <string name="optimize_app_manage_desc">卸载第三方应用（系统应用不显示；授权 Root/Shizuku 后可用 Shell 直接卸载）</string>
+    <string name="app_manage_title">应用管理</string>
+    <string name="app_manage_empty">没有可管理的第三方应用</string>
+    <string name="app_manage_loading">加载中…</string>
+    <string name="app_manage_uninstall">卸载</string>
+    <string name="app_manage_confirm_title">确认卸载</string>
+    <string name="app_manage_confirm_message">确定要卸载「%1$s」吗？\n\n将使用 Shell 权限执行卸载（pm uninstall）。</string>
+    <string name="app_manage_uninstalling">正在卸载…</string>
+    <string name="app_manage_success">已卸载 %1$s</string>
+    <string name="app_manage_failed">卸载失败，请重试</string>
+    <string name="app_manage_no_perm">未获取 Root/Shizuku 权限，已打开系统卸载界面</string>
+    <string name="optimize_whitelist_select_title">选择白名单应用</string>
+    <string name="optimize_whitelist_loading">加载应用列表中…</string>
 
     <string name="sys_android_version">Android 版本</string>
     <string name="sys_android_value">Android %1$s</string>
@@ -128,18 +147,18 @@
     <string name="float_item_refresh">屏幕刷新率</string>
 
     <string name="about_developer">本软件由慕寒_Official开发</string>
-    <string name="about_version">版本 73</string>
+    <string name="about_version">版本 73.1</string>
     <string name="about_bilibili">我的哔哩哔哩</string>
     <string name="about_bilibili_url">https://b23.tv/SGGpYuN</string>
     <string name="about_bilibili_open_failed">无法打开浏览器</string>
 
     <string name="welcome_title">欢迎使用慕寒性能优化</string>
-    <string name="welcome_tagline">为非专业用户打造的简易性能面板</string>
+    <string name="welcome_tagline">信息予你无限</string>
     <string name="welcome_privacy_title">您的隐私，我们的责任</string>
     <string name="welcome_privacy_message">本软件不联网，不收集隐私，不放恶意代码。</string>
     <string name="welcome_btn_start">开始使用</string>
 
-    <string name="about_slogan">为非专业用户打造的简易性能面板</string>
+    <string name="about_slogan">信息予你无限</string>
 
     <string name="storage_ram_title">物理内存 (RAM)</string>
     <string name="storage_ram_total">总容量</string>
