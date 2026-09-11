@@ -47,10 +47,9 @@
         <item name="android:textColorSecondary">?attr/colorOnSurfaceVariant</item>
         <item name="android:textColorHint">?attr/colorOutline</item>
 
-        <!-- Fluent 组件样式：按钮 4dp 圆角（Medium）、卡片 8dp 圆角（Large）、开关跟随 Accent -->
+        <!-- Fluent 组件样式：按钮 4dp 圆角（Medium）、卡片 8dp 圆角（Large） -->
         <item name="materialButtonStyle">@style/Widget.SocBatteryInfo.Fluent.Button</item>
         <item name="materialCardViewStyle">@style/Widget.SocBatteryInfo.Fluent.Card</item>
-        <item name="materialSwitchStyle">@style/Widget.SocBatteryInfo.Fluent.Switch</item>
     </style>
 
     <!-- Fluent 按钮：4dp 圆角、40dp 高度、句子大小写 -->
@@ -81,24 +80,18 @@
         <item name="strokeWidth">1dp</item>
     </style>
 
-    <!-- Fluent 开关 -->
-    <style name="Widget.SocBatteryInfo.Fluent.Switch" parent="Widget.Material3.CompoundButton.MaterialSwitch">
-        <item name="thumbTint">?attr/colorPrimary</item>
-        <item name="trackTint">?attr/colorPrimary</item>
-    </style>
-
     <!-- Toolbar（浅色表面 + 表面色文字，适配浅/深色模式） -->
     <style name="ToolbarTheme" parent="ThemeOverlay.MaterialComponents.ActionBar">
         <item name="android:textColorPrimary">?attr/colorOnSurface</item>
         <item name="colorControlNormal">?attr/colorOnSurfaceVariant</item>
     </style>
 
-    <!-- TabLayout Material3 style -->
+    <!-- TabLayout：指示色跟随主题（莫奈取色），选中背景使用动态容器色 -->
     <style name="Widget.SocBatteryInfo.Material3.TabLayout" parent="Widget.MaterialComponents.TabLayout">
         <item name="tabBackground">@drawable/bg_tab_selector</item>
-        <item name="tabTextColor">@color/text_secondary</item>
-        <item name="tabSelectedTextColor">@color/tab_active</item>
-        <item name="tabIndicatorColor">@color/tab_active</item>
+        <item name="tabTextColor">?attr/colorOnSurfaceVariant</item>
+        <item name="tabSelectedTextColor">?attr/colorPrimary</item>
+        <item name="tabIndicatorColor">?attr/colorPrimary</item>
         <item name="tabIndicatorHeight">2dp</item>
         <item name="tabIndicatorFullWidth">false</item>
     </style>

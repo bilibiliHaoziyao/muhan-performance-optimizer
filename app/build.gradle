@@ -15,8 +15,8 @@ android {
         applicationId "com.muhan.socbatteryinfo"
         minSdk 24
         targetSdk 35
-        versionCode 74
-        versionName "73.1"
+        versionCode 75
+        versionName "73.1.1"
 
         // 声明支持的 CPU 架构（本应用无 so 库，默认即全架构通用，此处显式声明）
         ndk {
