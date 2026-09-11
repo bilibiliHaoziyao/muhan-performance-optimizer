@@ -6,6 +6,8 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.muhan.socbatteryinfo.R
@@ -25,8 +27,16 @@ class SystemFragment : Fragment() {
     private lateinit var tvDeviceModel: TextView
     private lateinit var tvManufacturer: TextView
     private lateinit var tvBootloader: TextView
+    private lateinit var childContainer: FrameLayout
 
     private val handler = Handler(Looper.getMainLooper())
+
+    // 子页面返回后隐藏容器（子 Fragment 弹出返回栈时）
+    private val backStackListener = {
+        if (childFragmentManager.backStackEntryCount == 0 && ::childContainer.isInitialized) {
+            childContainer.visibility = View.GONE
+        }
+    }
 
     /** 开机时长每 30 秒刷新一次 */
     private val uptimeRunnable = object : Runnable {
@@ -57,9 +67,27 @@ class SystemFragment : Fragment() {
         tvDeviceModel = view.findViewById(R.id.tvDeviceModelValue)
         tvManufacturer = view.findViewById(R.id.tvManufacturerValue)
         tvBootloader = view.findViewById(R.id.tvBootloaderValue)
+        childContainer = view.findViewById(R.id.childFragmentContainer)
+
+        // 合并的子页面入口：屏幕 / 存储 / 卫星，以子 Fragment 覆盖展示
+        view.findViewById<Button>(R.id.btnScreen).setOnClickListener { openChild(ScreenFragment()) }
+        view.findViewById<Button>(R.id.btnStorage).setOnClickListener { openChild(StorageFragment()) }
+        view.findViewById<Button>(R.id.btnSatellite).setOnClickListener { openChild(SatelliteFragment()) }
 
         bindStaticInfo()
         updateUptime()
+
+        // 子页面返回后隐藏容器（子 Fragment 弹出返回栈时）
+        childFragmentManager.addOnBackStackChangedListener(backStackListener)
+    }
+
+    /** 打开子页面（屏幕/存储/卫星），加入返回栈，按返回键回到系统信息页 */
+    private fun openChild(fragment: Fragment) {
+        childContainer.visibility = View.VISIBLE
+        childFragmentManager.beginTransaction()
+            .replace(R.id.childFragmentContainer, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onResume() {
@@ -70,6 +98,11 @@ class SystemFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         handler.removeCallbacks(uptimeRunnable)
+    }
+
+    override fun onDestroyView() {
+        childFragmentManager.removeOnBackStackChangedListener(backStackListener)
+        super.onDestroyView()
     }
 
     private fun bindStaticInfo() {

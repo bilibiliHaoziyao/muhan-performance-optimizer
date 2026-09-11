@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<ScrollView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
@@ -9,6 +14,46 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="20dp">
+
+        <!-- 合并的子页面入口：屏幕 / 存储 / 卫星 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnScreen"
+                style="@style/Widget.SocBatteryInfo.Fluent.Button.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/tab_screen" />
+
+            <Button
+                android:id="@+id/btnStorage"
+                style="@style/Widget.SocBatteryInfo.Fluent.Button.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/tab_storage" />
+
+            <Button
+                android:id="@+id/btnSatellite"
+                style="@style/Widget.SocBatteryInfo.Fluent.Button.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/satellite_tab" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@color/divider" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -266,3 +311,14 @@
 
     </LinearLayout>
 </ScrollView>
+
+<!-- 子页面容器（屏幕/存储/卫星），默认隐藏，点击入口按钮后以子 Fragment 覆盖显示 -->
+<FrameLayout
+    android:id="@+id/childFragmentContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface"
+    android:visibility="gone" />
+
+</FrameLayout>
+

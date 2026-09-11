@@ -15,10 +15,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.muhan.socbatteryinfo.fragment.BatteryFragment
 import com.muhan.socbatteryinfo.fragment.OptimizeFragment
 import com.muhan.socbatteryinfo.fragment.OverviewFragment
-import com.muhan.socbatteryinfo.fragment.SatelliteFragment
-import com.muhan.socbatteryinfo.fragment.ScreenFragment
 import com.muhan.socbatteryinfo.fragment.SocFragment
-import com.muhan.socbatteryinfo.fragment.StorageFragment
 import com.muhan.socbatteryinfo.fragment.SystemFragment
 import com.muhan.socbatteryinfo.util.Prefs
 import com.muhan.socbatteryinfo.util.RootShell
@@ -38,21 +35,17 @@ class MainActivity : AppCompatActivity() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
 
         viewPager.adapter = ViewPagerAdapter(this)
-        // 禁用左右滑动切换Tab，只允许通过底部导航点击切换
+        // 禁用左右滑动切换 Tab，只允许通过底部导航点击切换
         viewPager.isUserInputEnabled = false
 
-        // 底部导航切换页面（所有8个页面都在底部导航里）
+        // 底部导航切换页面（BottomNavigationView 最多 5 项，其余页面在系统页内合并展示）
         bottomNav.setOnItemSelectedListener { item ->
             viewPager.setCurrentItem(
                 when (item.itemId) {
-                    R.id.nav_optimize -> 0
                     R.id.nav_overview -> 1
-                    R.id.nav_storage -> 2
+                    R.id.nav_soc -> 2
                     R.id.nav_system -> 3
-                    R.id.nav_screen -> 4
-                    R.id.nav_soc -> 5
-                    R.id.nav_battery -> 6
-                    R.id.nav_satellite -> 7
+                    R.id.nav_battery -> 4
                     else -> 0
                 },
                 false
@@ -100,19 +93,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private class ViewPagerAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa) {
-        override fun getItemCount(): Int = 8
+        override fun getItemCount(): Int = 5
 
         override fun createFragment(position: Int): Fragment {
             return when (position) {
                 0 -> OptimizeFragment()
                 1 -> OverviewFragment()
-                2 -> StorageFragment()
+                2 -> SocFragment()
                 3 -> SystemFragment()
-                4 -> ScreenFragment()
-                5 -> SocFragment()
-                6 -> BatteryFragment()
-                7 -> SatelliteFragment()
-                else -> OptimizeFragment()
+                else -> BatteryFragment()
             }
         }
     }
