@@ -2,15 +2,18 @@ package com.muhan.socbatteryinfo.util
 
 import android.app.ActivityManager
 import android.app.AppOpsManager
+import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Context
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Process
 
 /**
  * 运存优化工具：
  * - usagePercent() 读取运存占用率（/proc/meminfo）
- * - cleanBackgroundProcesses() 清理后台进程（跳过自身、白名单、前台与系统进程）
+ * - cleanBackgroundProcesses() 清理后台进程（跳过自身、白名单与前台应用）
  * - hasUsageStatsPermission() 是否已授权「使用情况访问」权限
  */
 object MemoryCleaner {
@@ -60,15 +63,19 @@ object MemoryCleaner {
     fun totalBytes(): Long? = StorageReader.readRam().totalBytes
 
     /**
-     * 清理后台进程，返回被清理的应用数量。
+     * 清理后台进程，返回执行清理的应用数量。
+     * 策略：枚举所有已安装的第三方应用，跳过自身、白名单与当前前台应用，
+     * 逐个执行 killBackgroundProcesses（对未运行的应用为无害空操作）。
      * @param whitelist 白名单包名（不清理）
      */
     fun cleanBackgroundProcesses(context: Context, whitelist: Set<String>): Int {
         val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val self = context.packageName
-        val killable = collectKillablePackages(context, am, self, whitelist)
+        val foreground = currentForegroundPackages(context)
+        val candidates = installedThirdPartyPackages(context)
+            .filter { it != self && it !in whitelist && it !in foreground }
         var count = 0
-        for (pkg in killable) {
+        for (pkg in candidates) {
             try {
                 am.killBackgroundProcesses(pkg)
                 count++
@@ -78,68 +85,51 @@ object MemoryCleaner {
         return count
     }
 
-    /** 收集可清理的后台应用包名（去重） */
-    private fun collectKillablePackages(
-        context: Context,
-        am: ActivityManager,
-        self: String,
-        whitelist: Set<String>
-    ): List<String> {
+    /** 当前处于前台/可见的应用（不清理），优先使用情况访问，其次运行进程判断 */
+    private fun currentForegroundPackages(context: Context): Set<String> {
         val result = mutableSetOf<String>()
-        val processes = try {
-            am.runningAppProcesses ?: emptyList()
-        } catch (_: Exception) {
-            emptyList()
-        }
-        val foregroundPackages = processes
-            .filter { it.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND }
-            .flatMap { it.pkgList.toList() }
-            .toSet()
-        // 有「使用情况访问」权限时，排除最近 3 分钟内使用过的应用（避免误杀刚使用过的应用）
-        val recentlyUsed = if (hasUsageStatsPermission(context)) {
-            recentlyUsedPackages(context, 3 * 60 * 1000L)
-        } else {
-            emptySet()
-        }
-
-        for (info in processes) {
-            if (info.importance > ActivityManager.RunningAppProcessInfo.IMPORTANCE_CACHED) continue
-            for (pkg in info.pkgList) {
-                if (pkg in result) continue
-                if (pkg == self || pkg in whitelist || pkg in foregroundPackages) continue
-                if (pkg in recentlyUsed) continue
-                if (isSystemApp(context, pkg)) continue
-                result.add(pkg)
+        if (hasUsageStatsPermission(context)) {
+            try {
+                val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+                val now = System.currentTimeMillis()
+                val events = usm.queryEvents(now - 60_000L, now)
+                val event = UsageEvents.Event()
+                var last: String? = null
+                while (events.hasNextEvent()) {
+                    events.getNextEvent(event)
+                    if (event.eventType == UsageEvents.Event.ACTIVITY_RESUMED) {
+                        last = event.packageName
+                    }
+                }
+                if (last != null) result.add(last)
+            } catch (_: Exception) {
             }
         }
-        return result.toList()
+        try {
+            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            am.runningAppProcesses?.forEach { info ->
+                if (info.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE) {
+                    result.addAll(info.pkgList)
+                }
+            }
+        } catch (_: Exception) {
+        }
+        return result
     }
 
-    /** 查询最近 [windowMs] 毫秒内使用过的应用包名（需「使用情况访问」权限） */
-    private fun recentlyUsedPackages(context: Context, windowMs: Long): Set<String> {
+    /** 所有已安装的第三方（非系统）应用包名 */
+    private fun installedThirdPartyPackages(context: Context): Set<String> {
         return try {
-            val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-            val now = System.currentTimeMillis()
-            val stats = usm.queryUsageStats(
-                UsageStatsManager.INTERVAL_DAILY,
-                now - windowMs,
-                now
-            )
-            stats.filter { it.lastTimeUsed >= now - windowMs }
+            val pm = context.packageManager
+            pm.getInstalledApplications(PackageManager.GET_META_DATA)
+                .filter { app ->
+                    (app.flags and ApplicationInfo.FLAG_SYSTEM) == 0 &&
+                        (app.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0
+                }
                 .map { it.packageName }
                 .toSet()
         } catch (_: Exception) {
             emptySet()
-        }
-    }
-
-    private fun isSystemApp(context: Context, pkg: String): Boolean {
-        return try {
-            val info = context.packageManager.getApplicationInfo(pkg, 0)
-            (info.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0 ||
-                (info.flags and android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
-        } catch (_: Exception) {
-            true
         }
     }
 }
